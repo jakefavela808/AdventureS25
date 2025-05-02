@@ -1,25 +1,26 @@
 ﻿{
   "Items": [
     {
-      "Name": "sword",
-      "Description": "long sword",
-      "InitialDescription": "There is a long sword stuck in a rock here.",
+      "Name": "treat",
+      "Description": "A treat for Pal.",
+      "InitialDescription": "A treat lies on the ground, ready to be used.",
       "IsTakeable": true,
-      "Location": "Entrance"
+      "Location": "Route 1"
     },
     {
-      "Name": "donut",
-      "Description": "A giant concrete donut that you can't take",
-      "InitialDescription": "A giant concrete donut rests on the floor.",
-      "IsTakeable": false,
-      "Location": "Storage"
+      "Name": "potion",
+      "Description": "A spray-type medicine for treating wounds. It restores the HP of one Pals by 20 points.",
+      "InitialDescription": "A potion sits here, perfect for healing your Pals.",
+      "IsTakeable": true,
+      "Location": "Pal Center"
     },
     {
-      "Name": "beer",
-      "Description": "beer's beer",
-      "InitialDescription": "There is a beer's beer in a beer here.",
+      "Name": "note",
+      "Description": "A note with a message from Professor Jon.",
+      "InitialDescription": "A note lies on the ground.",
       "IsTakeable": true,
-      "Location": "Throne Room"
+      "Location": "Orange Town"
     }
   ]
 }
+

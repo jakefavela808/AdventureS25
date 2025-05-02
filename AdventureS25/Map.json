@@ -1,45 +1,41 @@
 ﻿{
   "Locations": [
     {
-      "Name": "Entrance",
-      "Description": "This is the entrance room. Passages lead north, east, and west.",
-      "Connections": {
-        "east" : "Storage",
-        "north": "Throne Room",
-        "west" : "Pool"
-      }
+      "Name": "Orange Town",
+      "Description": "A small town with a few houses and Professor Jon's Lab.\nNorth: Route 1\n",
+      "Connections": {"north": "Route 1"},
+      "AsciiArt": "AsciiArt.homeLocation"
     },
-    
     {
-      "Name": "Storage",
-      "Description": "You are in a small storage room. There is an exit to the west.",
-      "Connections": {
-        "west" : "Entrance"
-      }    
+      "Name": "Professor Jon's Lab",
+      "Description": "Professor Jon's famous laboratory, filled with Pals research equipment.\nEast: Route 1\n",
+      "Connections": {"east": "Route 1"},
+      "AsciiArt": "AsciiArt.laboratoryLocation"
     },
-
     {
-      "Name": "Throne Room",
-      "Description": "There is a big ass throne here. An opening lies to the south.",
-      "Connections": {
-        "south" : "Entrance"
-      }
+      "Name": "Route 1",
+      "Description": "A grassy path connecting Orange Town and Viridian City. Wild Pals can be found here!\nNorth: Viridian City | East: Log Cabin | South: Orange Town | West: Professor Jon's Lab\n",
+      "Connections": {"south": "Orange Town" , "north": "Viridian City", "east": "Log Cabin", "west": "Professor Jon's Lab"},
+      "AsciiArt": "AsciiArt.grasslandsLocation"
     },
-
     {
-      "Name": "Pool",
-      "Description": "It's very very wet here.  The entrance room is to the east.",
-      "Connections": {
-        "east" : "Entrance"
-      }
+      "Name": "Viridian City",
+      "Description": "A bustling city with a Pal Center and Pal Mart.\nNorth: Route 1 | East: Pal Center\n",
+      "Connections": {"south": "Route 1", "east": "Pal Center"},
+      "AsciiArt": "AsciiArt.cityLocation"
     },
-
     {
-      "Name": "Cave",
-      "Description": "It's a dark cave.",
-      "Connections": {
-      }
+      "Name": "Pal Center",
+      "Description": "A modern facility where Nurse Noelia heals your Pals and offers advice.\nWest: Viridian City\n",
+      "Connections": {"west": "Viridian City"},
+      "AsciiArt": "AsciiArt.palCenterLocation"
+    },
+    {
+      "Name": "Log Cabin",
+      "Description": "A cozy log cabin deep in the woods, home to Matt.\nSouth: Route 1\n",
+      "Connections": {"south": "Route 1"},
+      "AsciiArt": "AsciiArt.riversideCabinLocation"
     }
   ],
-  "StartLocation": "Entrance"
+  "StartLocation": "Orange Town"
 }

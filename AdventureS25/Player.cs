@@ -1,4 +1,6 @@
-﻿namespace AdventureS25;
+namespace AdventureS25;
+
+using AdventureS25;
 
 public static class Player
 {
@@ -13,14 +15,25 @@ public static class Player
 
     public static void Move(Command command)
     {
+        // Only require HasReadNote condition
+        if (CurrentLocation == Map.StartLocation && !Conditions.IsTrue(ConditionTypes.HasReadNote))
+        {
+            Typewriter.TypeLine("You should read the note before leaving!");
+            Console.Clear();
+            Look();
+            return;
+        }
         if (CurrentLocation.CanMoveInDirection(command))
         {
             CurrentLocation = CurrentLocation.GetLocationInDirection(command);
+            Console.Clear();
             Console.WriteLine(CurrentLocation.GetDescription());
         }
         else
         {
-            Console.WriteLine("You can't move " + command.Noun + ".");
+            Typewriter.TypeLine("You can't move " + command.Noun + ".");
+            Console.Clear();
+            Look();
         }
     }
 
@@ -36,22 +49,30 @@ public static class Player
 
         if (item == null)
         {
-            Console.WriteLine("I don't know what " + command.Noun + " is.");
+            Typewriter.TypeLine("I don't know what " + command.Noun + " is.");
+            Console.Clear();
+            Look();
         }
         else if (!CurrentLocation.HasItem(item))
         {
-            Console.WriteLine("There is no " + command.Noun + " here.");
+            Typewriter.TypeLine("There is no " + command.Noun + " here.");
+            Console.Clear();
+            Look();
         }
         else if (!item.IsTakeable)
         {
-            Console.WriteLine("The " + command.Noun + " can't be taked.");
+            Typewriter.TypeLine("The " + command.Noun + " can't be taked.");
+            Console.Clear();
+            Look();
         }
         else
         {
             Inventory.Add(item);
             CurrentLocation.RemoveItem(item);
             item.Pickup();
-            Console.WriteLine("You take the " + command.Noun + ".");
+            Typewriter.TypeLine("You take the " + command.Noun + ".");
+            Console.Clear();
+            Look();
         }
     }
 
@@ -59,15 +80,15 @@ public static class Player
     {
         if (Inventory.Count == 0)
         {
-            Console.WriteLine("You are empty-handed.");
+            Typewriter.TypeLine("You are empty-handed.");
         }
         else
         {
-            Console.WriteLine("You are carrying:");
+            Typewriter.TypeLine("You are carrying:");
             foreach (Item item in Inventory)
             {
                 string article = SemanticTools.CreateArticle(item.Name);
-                Console.WriteLine(" " + article + " " + item.Name);
+                Typewriter.TypeLine(article + " " + item.Name);
             }
         }
     }
@@ -84,17 +105,23 @@ public static class Player
         if (item == null)
         {
             string article = SemanticTools.CreateArticle(command.Noun);
-            Console.WriteLine("I don't know what " + article + " " + command.Noun + " is.");
+            Typewriter.TypeLine("I don't know what " + article + " " + command.Noun + " is.");
+            Console.Clear();
+            Look();
         }
         else if (!Inventory.Contains(item))
         {
-            Console.WriteLine("You're not carrying the " + command.Noun + ".");
+            Typewriter.TypeLine("You're not carrying the " + command.Noun + ".");
+            Console.Clear();
+            Look();
         }
         else
         {
             Inventory.Remove(item);
             CurrentLocation.AddItem(item);
-            Console.WriteLine("You drop the " + command.Noun + ".");
+            Typewriter.TypeLine("You drop the " + command.Noun + ".");
+            Console.Clear();
+            Look();
         }
 
     }
@@ -103,7 +130,7 @@ public static class Player
     {
         if (command.Noun == "beer")
         {
-            Console.WriteLine("** drinking beer");
+            Typewriter.TypeLine("** drinking beer");
             Conditions.ChangeCondition(ConditionTypes.IsDrunk, true);
             RemoveItemFromInventory("beer");
             AddItemToInventory("beer-bottle");
@@ -140,7 +167,9 @@ public static class Player
         // if there's no location with that name
         if (newLocation == null)
         {
-            Console.WriteLine("Trying to move to unknown location: " + locationName + ".");
+            Typewriter.TypeLine("Trying to move to unknown location: " + locationName + ".");
+            Console.Clear();
+            Look();
             return;
         }
             
@@ -149,5 +178,24 @@ public static class Player
         
         // print out a description of the location
         Look();
+    }
+
+    public static void Read(Command command)
+    {
+        if (Inventory.Contains(Items.GetItemByName("note"))) {
+    Console.Clear();
+    Look();
+    Typewriter.TypeLine("Dear Adventurer,\n\nListen up fucker! I heard you're trying to become some kind of Pal Tamer or whatever. GOOD NEWS! I'm gonna help you not completely suck at it! I've been studying this AMAZING new Pal specimen that's perfect for beginners.\n\nGet your ass over to my Fusion Lab ASAP!!! Don't make me come find you, because I WILL, and you WON'T like it! This is important COMPUTER SCIENCE happening here!\n\nSincerely, \nProf. Jon (the smartest Computer Scientist in this dimension)");
+    Inventory.Remove(Items.GetItemByName("note"));
+    Conditions.ChangeCondition(ConditionTypes.HasReadNote, true);
+    Console.Clear();
+    Look();
+}
+        else
+        {
+            Typewriter.TypeLine("You don't have a note to read.");
+            Console.Clear();
+            Look();
+        }
     }
 }

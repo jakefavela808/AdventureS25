@@ -1,4 +1,4 @@
-﻿namespace AdventureS25;
+namespace AdventureS25;
 
 public static class CombatCommandValidator
 {
@@ -9,7 +9,7 @@ public static class CombatCommandValidator
         {
             return true;
         }
-        Console.WriteLine("Valid commands are: 1, 2, 3, 4");
+        Typewriter.TypeLine("Valid commands are: 1, 2, 3, 4");
         return false;
     }
 }

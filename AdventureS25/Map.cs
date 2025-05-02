@@ -1,6 +1,8 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 
 namespace AdventureS25;
+
+using AdventureS25;
 
 public static class Map
 {
@@ -19,7 +21,32 @@ public static class Map
         Dictionary<string, Location> locations = new Dictionary<string, Location>();
         foreach (LocationJsonData location in data.Locations)
         {
-            Location newLocation = AddLocation(location.Name, location.Description);
+            string asciiArt = null;
+            if (!string.IsNullOrEmpty(location.AsciiArt))
+            {
+                string artKey = location.AsciiArt;
+                // If the value is like 'AsciiArt.cityLocation', extract 'cityLocation'
+                int dotIdx = artKey.IndexOf('.');
+                if (dotIdx >= 0 && dotIdx < artKey.Length - 1)
+                {
+                    artKey = artKey.Substring(dotIdx + 1);
+                }
+                // Support both field and property lookup
+                var asciiArtField = typeof(AsciiArt).GetField(artKey, System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
+                if (asciiArtField != null)
+                {
+                    asciiArt = asciiArtField.GetValue(null) as string;
+                }
+                else
+                {
+                    var asciiArtProp = typeof(AsciiArt).GetProperty(artKey, System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
+                    if (asciiArtProp != null)
+                    {
+                        asciiArt = asciiArtProp.GetValue(null) as string;
+                    }
+                }
+            }
+            Location newLocation = AddLocation(location.Name, location.Description, asciiArt);
             locations.Add(location.Name, newLocation);
         }
         
@@ -39,7 +66,7 @@ public static class Map
                 }
                 else
                 {
-                    Console.WriteLine("Unknown destination: " + destination);
+                    Typewriter.TypeLine("Unknown destination: " + destination);
                 }
             }
         }
@@ -50,13 +77,13 @@ public static class Map
         }
         else
         {
-            Console.WriteLine("StartLocation not found in Map.json");
+            Typewriter.TypeLine("StartLocation not found in Map.json");
         }
     }
 
-    private static Location AddLocation(string locationName, string locationDescription)
+    private static Location AddLocation(string locationName, string locationDescription, string asciiArt = null)
     {
-        Location newLocation = new Location(locationName, locationDescription);
+        Location newLocation = new Location(locationName, locationDescription, asciiArt);
         nameToLocation.Add(locationName, newLocation);
         return newLocation;
     }
@@ -109,7 +136,7 @@ public static class Map
         // if the locations don't exist
         if (start == null || end == null)
         {
-            Console.WriteLine("Tried to create a connection between unknown locations: " +
+            Typewriter.TypeLine("Tried to create a connection between unknown locations: " +
                               startLocationName + " and " + endLocationName);
             return;
         }
@@ -124,7 +151,7 @@ public static class Map
         
         if (start == null)
         {
-            Console.WriteLine("Tried to remove a connection from an unknown location: " +
+            Typewriter.TypeLine("Tried to remove a connection from an unknown location: " +
                               startLocationName);
             return;
         }

@@ -1,4 +1,6 @@
-﻿namespace AdventureS25;
+namespace AdventureS25;
+
+using AdventureS25;
 
 public static class States
 {
@@ -26,6 +28,7 @@ public static class States
 
     public static void ChangeState(StateTypes stateType)
     {
+        Console.Clear();
         if (!states.ContainsKey(stateType))
         {
             return;
@@ -33,6 +36,6 @@ public static class States
         CurrentState = states[stateType];
         CurrentStateType = stateType;
         
-        Console.WriteLine("Changing to state " + stateType);
+        Typewriter.TypeLine("Changing to state " + stateType);
     }
 }

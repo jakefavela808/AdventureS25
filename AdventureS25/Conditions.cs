@@ -1,4 +1,4 @@
-﻿using System.Net.Sockets;
+using System.Net.Sockets;
 
 namespace AdventureS25;
 
@@ -9,6 +9,8 @@ public static class Conditions
     
     public static void Initialize()
     {
+        Condition hasReadNote = new Condition(ConditionTypes.HasReadNote);
+        Add(hasReadNote);
         Condition isDrunk = new Condition(ConditionTypes.IsDrunk);
         isDrunk.AddToActivateList(ConditionActions.WriteOutput("Hic!"));
         Add(isDrunk);

@@ -1,4 +1,6 @@
-﻿namespace AdventureS25;
+using AdventureS25;
+
+namespace AdventureS25;
 
 class Program
 {

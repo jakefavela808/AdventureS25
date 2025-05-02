@@ -1,4 +1,6 @@
-﻿namespace AdventureS25;
+namespace AdventureS25;
+
+using AdventureS25;
 
 public static class Parser
 {
@@ -28,7 +30,9 @@ public static class Parser
         }
         else
         {
-            Console.WriteLine("I don't understand that.");
+            Typewriter.TypeLine("I don't understand that.");
+            Console.Clear();
+            Player.Look();
         }
         
         return command;

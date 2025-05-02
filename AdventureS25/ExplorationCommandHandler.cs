@@ -1,4 +1,6 @@
-﻿namespace AdventureS25;
+namespace AdventureS25;
+
+using AdventureS25;
 
 public static class ExplorationCommandHandler
 {
@@ -25,9 +27,13 @@ public static class ExplorationCommandHandler
             {"tidyup", TidyUp},
             {"teleport", Teleport},
             {"connect", Connect},
-            {"disconnect", Disconnect}
+            {"disconnect", Disconnect},
+            {"read", Read}
         };
-
+    private static void Read(Command obj)
+    {
+        Player.Read(obj);
+    }
     private static void Disconnect(Command obj)
     {
         Conditions.ChangeCondition(ConditionTypes.IsRemovedConnection, true);
@@ -89,7 +95,7 @@ public static class ExplorationCommandHandler
         List<string> verbs = ExplorationCommandValidator.GetVerbs();
         foreach (string verb in verbs)
         {
-            Console.WriteLine(verb);
+            Typewriter.TypeLine(verb);
         }
     }
 
@@ -98,7 +104,7 @@ public static class ExplorationCommandHandler
         List<string> nouns = ExplorationCommandValidator.GetNouns();
         foreach (string noun in nouns)
         {
-            Console.WriteLine(noun);
+            Typewriter.TypeLine(noun);
         }
     }
 
@@ -111,7 +117,9 @@ public static class ExplorationCommandHandler
         }
         else
         {
-            Console.WriteLine("I don't know how to do that.");
+            Typewriter.TypeLine("I don't know how to do that.");
+            Console.Clear();
+            Player.Look();
         }
     }
     
@@ -147,7 +155,7 @@ public static class ExplorationCommandHandler
 
     public static void Eat(Command command)
     {
-        Console.WriteLine("Eating..." + command.Noun);
+        Typewriter.TypeLine("Eating..." + command.Noun);
     }
 
     public static void Move(Command command)

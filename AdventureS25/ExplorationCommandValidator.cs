@@ -1,9 +1,11 @@
-﻿namespace AdventureS25;
+namespace AdventureS25;
+
+using AdventureS25;
 
 public static class ExplorationCommandValidator
 {
     public static List<string> Verbs = new List<string>
-        {"go", "eat", "take", "drop", "drink"};
+        {"go", "eat", "take", "drop", "drink", "read"};
     
     public static List<string> StandaloneVerbs = new List<string>
     {
@@ -15,7 +17,7 @@ public static class ExplorationCommandValidator
     public static List<string> Nouns = new List<string>
     {
         "bagel", "apple", "beer", "east", "west", "north", "south",
-        "up", "down", "sword"
+        "up", "down", "sword", "note"
     };
     
     public static bool IsValid(Command command)
@@ -36,7 +38,9 @@ public static class ExplorationCommandValidator
                 }
                 else
                 {
-                    Console.WriteLine("I don't know how to do that.");
+                    Typewriter.TypeLine("I don't know how to do that.");
+                    Console.Clear();
+                    Player.Look();
                 }
             }
             else if (IsNoun(command.Noun))
@@ -46,12 +50,16 @@ public static class ExplorationCommandValidator
             }
             else
             {
-                Console.WriteLine("I don't know how to do that.");
+                Typewriter.TypeLine("I don't know how to do that.");
+                Console.Clear();
+                Player.Look();
             }
         }
         else
         {
-            Console.WriteLine("I don't know the word " + command.Verb + ".");
+            Typewriter.TypeLine("I don't know the word " + command.Verb + ".");
+            Console.Clear();
+            Player.Look();
         }
             
         return isValid;
