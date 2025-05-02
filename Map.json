@@ -1,0 +1,45 @@
+﻿{
+  "Locations": [
+    {
+      "Name": "Entrance",
+      "Description": "This is the entrance room. Passages lead north, east, and west.",
+      "Connections": {
+        "east" : "Storage",
+        "north": "Throne Room",
+        "west" : "Pool"
+      }
+    },
+    
+    {
+      "Name": "Storage",
+      "Description": "You are in a small storage room. There is an exit to the west.",
+      "Connections": {
+        "west" : "Entrance"
+      }    
+    },
+
+    {
+      "Name": "Throne Room",
+      "Description": "There is a big ass throne here. An opening lies to the south.",
+      "Connections": {
+        "south" : "Entrance"
+      }
+    },
+
+    {
+      "Name": "Pool",
+      "Description": "It's very very wet here.  The entrance room is to the east.",
+      "Connections": {
+        "east" : "Entrance"
+      }
+    },
+
+    {
+      "Name": "Cave",
+      "Description": "It's a dark cave.",
+      "Connections": {
+      }
+    }
+  ],
+  "StartLocation": "Entrance"
+}

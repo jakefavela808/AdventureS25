@@ -1,0 +1,25 @@
+﻿{
+  "Items": [
+    {
+      "Name": "sword",
+      "Description": "long sword",
+      "InitialDescription": "There is a long sword stuck in a rock here.",
+      "IsTakeable": true,
+      "Location": "Entrance"
+    },
+    {
+      "Name": "donut",
+      "Description": "A giant concrete donut that you can't take",
+      "InitialDescription": "A giant concrete donut rests on the floor.",
+      "IsTakeable": false,
+      "Location": "Storage"
+    },
+    {
+      "Name": "beer",
+      "Description": "beer's beer",
+      "InitialDescription": "There is a beer's beer in a beer here.",
+      "IsTakeable": true,
+      "Location": "Throne Room"
+    }
+  ]
+}
