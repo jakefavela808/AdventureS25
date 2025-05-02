@@ -7,10 +7,12 @@ public static class ConversationCommandHandler
     private static Dictionary<string, Action<Command>> commandMap =
         new Dictionary<string, Action<Command>>()
         {
-            {"y", Yes},
-            {"n", No},
+            {"yes", Yes},
+            {"no", No},
             {"leave", Leave},
-            {"choose", ChooseStarter},
+            {"1", ChooseStarter},
+            {"2", ChooseStarter},
+            {"3", ChooseStarter},
         };
     
     public static void Handle(Command command)
@@ -20,10 +22,17 @@ public static class ConversationCommandHandler
             Action<Command> action = commandMap[command.Verb];
             action.Invoke(command);
         }
+        // Remove any legacy 'choose' verb handling
+        // No need to parse 'choose' as a command anymore
     }
 
     private static string pendingStarterChoice = null;
     private static bool awaitingStarterSelection = false;
+
+    public static bool IsAwaitingStarterSelection()
+    {
+        return awaitingStarterSelection;
+    }
 
     private static void Yes(Command command)
     {
@@ -35,6 +44,14 @@ public static class ConversationCommandHandler
         }
         else if (pendingStarterChoice == "Professor Jon")
         {
+            if (Conditions.IsTrue(ConditionTypes.HasReceivedStarter))
+            {
+                Typewriter.TypeLine("Professor Jon is busy right now and doesn't have anything else for you.");
+                pendingStarterChoice = null;
+                awaitingStarterSelection = false;
+                States.ChangeState(StateTypes.Exploring);
+                return;
+            }
             PromptStarterSelection();
             awaitingStarterSelection = true;
         }
@@ -52,6 +69,8 @@ public static class ConversationCommandHandler
             pendingStarterChoice = null;
             awaitingStarterSelection = false;
             States.ChangeState(StateTypes.Exploring);
+            Console.Clear();
+            Player.Look();
         }
         else
         {
@@ -67,7 +86,7 @@ public static class ConversationCommandHandler
         States.ChangeState(StateTypes.Exploring);
     }
 
-    private static void Talk(Command command)
+    public static void Talk(Command command)
     {
         // Find the NPC at the current location
         var npcs = Player.CurrentLocation.GetNpcs();
@@ -77,50 +96,82 @@ public static class ConversationCommandHandler
             States.ChangeState(StateTypes.Exploring);
             return;
         }
-        // For simplicity, talk to the first NPC present
+        // Talk to the first NPC
+        Console.Clear();
+        States.ChangeState(StateTypes.Talking);
+        Console.WriteLine(CommandList.conversationCommands);
+
         var npc = npcs[0];
+        // Approach and display art
         Typewriter.TypeLine($"You approach {npc.Name}.");
-        Typewriter.TypeLine(npc.GetLocationDescription());
+        string art = npc.AsciiArt;
+        if (!string.IsNullOrEmpty(art) && art.StartsWith("AsciiArt."))
+        {
+            var type = typeof(AsciiArt);
+            var fieldName = art.Substring("AsciiArt.".Length);
+            var field = type.GetField(fieldName);
+            if (field != null)
+                art = field.GetValue(null)?.ToString() ?? art;
+            else
+            {
+                var propInfo = type.GetProperty(fieldName);
+                if (propInfo != null)
+                    art = propInfo.GetValue(null)?.ToString() ?? art;
+            }
+        }
+        if (!string.IsNullOrEmpty(art))
+            Console.WriteLine(art);
+        // Initial description
+        Typewriter.TypeLine(npc.InitialDescription);
+
+        // Professor Jon logic
+        if (npc.Name == "Professor Jon")
+        {
+            if (Conditions.IsTrue(ConditionTypes.HasReceivedStarter))
+            {
+                Typewriter.TypeLine("Professor Jon is busy right now and doesn't have anything else for you.");
+                States.ChangeState(StateTypes.Exploring);
+                return;
+            }
+            Typewriter.TypeLine("Would you like to choose your starter Pal? (yes/no)");
+            pendingStarterChoice = "Professor Jon";
+            return;
+        }
+        // Nurse Noelia logic
         if (npc.Name == "Nurse Noelia")
         {
-            Typewriter.TypeLine("Would you like me to heal your Pals? (y/n)");
+            Typewriter.TypeLine("Would you like me to heal your Pals? (yes/no)");
             pendingStarterChoice = "Nurse Noelia";
+            return;
         }
-        else if (npc.Name == "Professor Jon")
-        {
-            Typewriter.TypeLine("Would you like to choose your starter Pal? (y/n)");
-            pendingStarterChoice = "Professor Jon";
-        }
-        else
-        {
-            Typewriter.TypeLine(npc.Description);
-            States.ChangeState(StateTypes.Exploring);
-        }
+        // Default NPC
+        Typewriter.TypeLine(npc.Description);
+        States.ChangeState(StateTypes.Exploring);
     }
 
     private static void ChooseStarter(Command command)
     {
-        if (!awaitingStarterSelection)
+        if (!awaitingStarterSelection || Conditions.IsTrue(ConditionTypes.HasReceivedStarter))
         {
             Typewriter.TypeLine("No starter selection is pending.");
             return;
         }
-        string choice = command.Noun.Trim().ToLower();
-        string[] starters = { "sandie", "clyde capybara", "gloop glorp" };
-        string selected = null;
-        foreach (var s in starters)
+        string choice = command.Verb.Trim();
+        string[] starters = { "Sandie", "Clyde Capybara", "Gloop Glorp" };
+        int index = -1;
+        if (int.TryParse(choice, out int num))
         {
-            if (choice == s.ToLower() || choice == s.Split(' ')[0])
+            if (num >= 1 && num <= 3)
             {
-                selected = s;
-                break;
+                index = num - 1;
             }
         }
-        if (selected == null)
+        if (index == -1)
         {
-            Typewriter.TypeLine("Invalid choice. Please type: choose sandie, choose clyde, or choose gloop.");
+            Typewriter.TypeLine("Invalid choice. Please enter 1, 2, or 3.");
             return;
         }
+        string selected = starters[index];
         var pal = Pals.GetPalByName(selected);
         if (pal == null)
         {
@@ -128,10 +179,31 @@ public static class ConversationCommandHandler
             return;
         }
         Player.AddPal(pal);
+        // Print the Pal's ASCII art before the confirmation message
+        string art = pal.AsciiArt;
+        if (!string.IsNullOrEmpty(art) && art.StartsWith("AsciiArt."))
+        {
+            var type = typeof(AsciiArt);
+            var fieldName = art.Substring("AsciiArt.".Length);
+            var field = type.GetField(fieldName);
+            if (field != null)
+                art = field.GetValue(null)?.ToString() ?? art;
+            else
+            {
+                var propInfo = type.GetProperty(fieldName);
+                if (propInfo != null)
+                    art = propInfo.GetValue(null)?.ToString() ?? art;
+            }
+        }
+        if (!string.IsNullOrEmpty(art))
+            Console.WriteLine(art);
         Typewriter.TypeLine($"You chose {pal.Name} as your starter Pal!");
         awaitingStarterSelection = false;
         pendingStarterChoice = null;
+        Conditions.ChangeCondition(ConditionTypes.HasReceivedStarter, true);
         States.ChangeState(StateTypes.Exploring);
+        Console.Clear();
+        Player.Look();
     }
 
     private static void HealAllPals()
@@ -154,6 +226,6 @@ public static class ConversationCommandHandler
 
     private static void PromptStarterSelection()
     {
-        Typewriter.TypeLine("Please choose your starter Pal: Sandie, Clyde Capybara, or Gloop Glorp.\nType: choose sandie, choose clyde, or choose gloop");
+        Typewriter.TypeLine("Please choose your starter pal:\n1. Sandie\n2. Clyde Capybara\n3. Gloop Glorp");
     }
 }

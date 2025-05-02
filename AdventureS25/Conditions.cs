@@ -11,6 +11,9 @@ public static class Conditions
     {
         Condition hasReadNote = new Condition(ConditionTypes.HasReadNote);
         Add(hasReadNote);
+        // Register HasReceivedStarter so it can be tracked
+        Condition hasReceivedStarter = new Condition(ConditionTypes.HasReceivedStarter);
+        Add(hasReceivedStarter);
         Condition isDrunk = new Condition(ConditionTypes.IsDrunk);
         isDrunk.AddToActivateList(ConditionActions.WriteOutput("Hic!"));
         Add(isDrunk);

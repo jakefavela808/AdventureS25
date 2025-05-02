@@ -61,25 +61,19 @@ public class Location
         }
         fullDescription += Description;
 
-        // Show NPCs in the location
+        // Show NPCs in the location (no ASCII art, just initial description)
         foreach (Npc npc in npcs)
         {
-            if (!string.IsNullOrEmpty(npc.AsciiArt))
-            {
-                fullDescription += "\n" + npc.AsciiArt;
-            }
             if (!string.IsNullOrEmpty(npc.InitialDescription))
             {
                 fullDescription += "\n" + npc.InitialDescription;
             }
         }
-        // Show Pals in the location
-        foreach (Pal pal in pals)
+        // Show only ONE random Pal's initial description (no ASCII art)
+        if (pals.Count > 0)
         {
-            if (!string.IsNullOrEmpty(pal.AsciiArt))
-            {
-                fullDescription += "\n" + pal.AsciiArt;
-            }
+            var random = new Random();
+            var pal = pals[random.Next(pals.Count)];
             if (!string.IsNullOrEmpty(pal.InitialDescription))
             {
                 fullDescription += "\n" + pal.InitialDescription;

@@ -1,6 +1,7 @@
 namespace AdventureS25;
 
 using AdventureS25;
+using System.Linq;
 
 public static class ExplorationCommandHandler
 {
@@ -76,9 +77,16 @@ public static class ExplorationCommandHandler
         Player.Drink(command);
     }
 
-    private static void ChangeToTalkState(Command obj)
+    private static void ChangeToTalkState(Command command)
     {
-        States.ChangeState(StateTypes.Talking);
+        // Block talking to Professor Jon after starter received
+        var npcs = Player.CurrentLocation.GetNpcs();
+        if (npcs.Any(npc => npc.Name == "Professor Jon") && Conditions.IsTrue(ConditionTypes.HasReceivedStarter))
+        {
+            Typewriter.TypeLine("You have already received your first Pal. Professor Jon is busy right now and doesn't have anything else for you.");
+            return;
+        }
+        ConversationCommandHandler.Talk(command);
     }
     
     private static void ChangeToFightState(Command obj)

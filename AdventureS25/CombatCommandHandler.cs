@@ -20,18 +20,22 @@ public static class CombatCommandHandler
         if (wildPal == null)
         {
             Typewriter.TypeLine("There is no wild Pal here to fight!");
+            Console.Clear();
+            Player.Look();
             return;
         }
         // Use the first Pal in the player's inventory for battle
         if (Player.Pals == null || Player.Pals.Count == 0)
         {
             Typewriter.TypeLine("You don't have a Pal to fight with!");
+            Console.Clear();
+            Player.Look();
             return;
         }
         var playerPal = Player.Pals[0];
         BattleManager.StartBattle(playerPal, wildPal);
         States.ChangeState(StateTypes.Fighting);
-        Typewriter.TypeLine("Battle started! Use battle commands like: basic, special, defend, potion, tame, run.");
+        Console.WriteLine(CommandList.combatCommands);
         // Print full battle UI/UX
         Typewriter.TypeLine("================ BATTLE START ================");
         Typewriter.TypeLine($"You send out: {playerPal.Name}!");

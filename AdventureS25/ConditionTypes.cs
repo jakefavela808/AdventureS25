@@ -3,6 +3,7 @@ namespace AdventureS25;
 public enum ConditionTypes
 {
     HasReadNote,
+    HasReceivedStarter,
     HasKey,  
     IsTiny,   
     IsDrunk,  

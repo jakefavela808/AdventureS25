@@ -23,6 +23,7 @@ public static class BattleManager
     }
 
     private static bool playerDefending = false;
+    private static bool enemyDefending = false;
 
     public static void HandlePlayerAction(string action)
     {
@@ -127,16 +128,31 @@ public static class BattleManager
     private static void EnemyTurn()
     {
         if (wildPal == null || playerPal == null) return;
-        bool useSpecial = rng.NextDouble() < 0.3;
-        string move = useSpecial && wildPal.Moves?.Count > 1 ? wildPal.Moves[1] : wildPal.Moves?[0] ?? "Wild Attack";
-        if (playerDefending)
+        // 0: basic, 1: special, 2: defend
+        int action = rng.Next(0, 3);
+        if (action == 2) // defend
         {
-            DoAttack(wildPal, playerPal, move, useSpecial, halveDamage:true);
-            playerDefending = false;
+            // Enemy braces and heals
+            int heal = 5;
+            wildPal.HP = Math.Min(wildPal.MaxHP, wildPal.HP + heal);
+            Typewriter.TypeLine($"{wildPal.Name} braces for the next attack and heals for {heal} HP!");
+            Typewriter.TypeLine($"{playerPal.Name} HP: {playerPal.HP}/{playerPal.MaxHP} | {wildPal.Name} HP: {wildPal.HP}/{wildPal.MaxHP}");
+            // Set a flag so next player attack is halved
+            enemyDefending = true;
         }
         else
         {
-            DoAttack(wildPal, playerPal, move, useSpecial);
+            bool useSpecial = (action == 1);
+            string move = useSpecial && wildPal.Moves?.Count > 1 ? wildPal.Moves[1] : wildPal.Moves?[0] ?? "Wild Attack";
+            if (enemyDefending)
+            {
+                DoAttack(wildPal, playerPal, move, useSpecial, halveDamage:true);
+                enemyDefending = false;
+            }
+            else
+            {
+                DoAttack(wildPal, playerPal, move, useSpecial);
+            }
         }
     }
 

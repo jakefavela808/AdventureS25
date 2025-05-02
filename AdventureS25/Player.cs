@@ -109,6 +109,24 @@ public static class Player
             foreach (Pal pal in Pals)
             {
                 Typewriter.TypeLine($"{pal.Name} - HP: {pal.HP}/{pal.MaxHP}");
+                // Print resolved ASCII art above description
+                string art = pal.AsciiArt;
+                if (!string.IsNullOrEmpty(art) && art.StartsWith("AsciiArt."))
+                {
+                    var type = typeof(AsciiArt);
+                    var fieldName = art.Substring("AsciiArt.".Length);
+                    var field = type.GetField(fieldName);
+                    if (field != null)
+                        art = field.GetValue(null)?.ToString() ?? art;
+                    else
+                    {
+                        var propInfo = type.GetProperty(fieldName);
+                        if (propInfo != null)
+                            art = propInfo.GetValue(null)?.ToString() ?? art;
+                    }
+                }
+                if (!string.IsNullOrEmpty(art))
+                    Console.WriteLine(art);
                 Typewriter.TypeLine($"{pal.Description}");
             }
         }
