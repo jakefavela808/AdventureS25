@@ -13,12 +13,18 @@ public static class Npcs
         string path = Path.Combine(Environment.CurrentDirectory, "NPCs.json");
         string rawText = File.ReadAllText(path);
         var data = JsonSerializer.Deserialize<NpcsJsonData>(rawText);
-        foreach (var npc in data.Npcs)
+        foreach (var npc in data.NPCs)
         {
             nameToNpc[npc.Name] = npc;
             var location = Map.GetLocationByName(npc.Location);
             if (location != null)
+            {
                 location.AddNpc(npc);
+            }
+            else
+            {
+                Typewriter.TypeLine($"Warning: Location '{npc.Location}' for NPC '{npc.Name}' not found. NPC not placed in world.");
+            }
         }
     }
 

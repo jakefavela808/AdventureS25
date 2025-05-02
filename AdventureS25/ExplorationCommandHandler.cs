@@ -28,7 +28,8 @@ public static class ExplorationCommandHandler
             {"teleport", Teleport},
             {"connect", Connect},
             {"disconnect", Disconnect},
-            {"read", Read}
+            {"read", Read},
+            {"pals", ShowPals}
         };
     private static void Read(Command obj)
     {
@@ -82,7 +83,7 @@ public static class ExplorationCommandHandler
     
     private static void ChangeToFightState(Command obj)
     {
-        States.ChangeState(StateTypes.Fighting);
+        CombatCommandHandler.Fight(obj);
     }
     
     private static void ChangeToExploreState(Command obj)
@@ -136,6 +137,11 @@ public static class ExplorationCommandHandler
     private static void ShowInventory(Command command)
     {
         Player.ShowInventory();
+    }
+
+    private static void ShowPals(Command command)
+    {
+        Player.ShowPals();
     }
     
     private static void Take(Command command)

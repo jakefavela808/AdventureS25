@@ -2,12 +2,57 @@
   "Pals": [
     {
       "Name": "Sandie",
-      "Description": "A Corgi-type Pal with quantum-computing capabilities.",
+      "Description": "A Corgi-type Pal with quantum-computing capabilities. She's extremely affectionate, loyal, and always hungry.",
       "InitialDescription": "A wild Sandie is here, its tail crackling with electricity!",
       "IsAcquirable": true,
-      "Location": "Route 1",
-      "AsciiArt": "  /\\_/\\\n ( o.o )\n  > ^ <",
+      "Location": "",
+      "AsciiArt": "AsciiArt.sandiePal",
       "Moves": ["Quantum Chomp", "Corgi Overdrive"]
+    },
+    {
+      "Name": "Clyde Capybara",
+      "Description": "A Capybara-type Pal known for its chill demeanor and impressive water skills. Its calm presence makes it a favorite among new trainers.",
+      "InitialDescription": "A wild Clyde Capybara is here, looking ready to join a trainer!",
+      "IsAcquirable": true,
+      "Location": "",
+      "AsciiArt": "AsciiArt.clydeCapybaraPal",
+      "Moves": ["Capybara Splash", "Zen Wave"]
+    },
+    {
+      "Name": "Gloop Glorp",
+      "Description": "An alien cat-type Pal with mysterious cosmic abilities. Gloop Glorp is curious, mischievous, and always seems to know more than it lets on.",
+      "InitialDescription": "A wild Gloop Glorp flutters nearby, pecking at the ground.",
+      "IsAcquirable": true,
+      "Location": "",
+      "AsciiArt": "AsciiArt.gloopGlorpPal",
+      "Moves": ["Cosmic Pounce", "Nebula Beam"]
+    },
+    {
+      "Name": "Pibble",
+      "Description": "A dog-type Pal with a big head. Pibble always wants to be everyone’s best friend.",
+      "InitialDescription": "A wild Pibble is here, its tail crackling with electricity!",
+      "IsAcquirable": true,
+      "Location": "Route 1",
+      "AsciiArt": "AsciiArt.pibblePal",
+      "Moves": ["Big Headbutt", "Trancing Stare"]
+    },
+    {
+      "Name": "Bark Zuckerburg",
+      "Description": "A dog-type Pal with a talent for technology. Bark Zuckerburg is always plotting his next big app.",
+      "InitialDescription": "A wild Bark Zuckerburg is here, its tail crackling with electricity!",
+      "IsAcquirable": true,
+      "Location": "Route 1",
+      "AsciiArt": "AsciiArt.barkZuckerburgPal",
+      "Moves": ["App Launch", "Tech Takeover"]
+    },
+    {
+      "Name": "Morty",
+      "Description": "A dog-type Pal who’s a bit anxious but endlessly loyal. Morty always finds himself in strange situations, but he’ll follow his trainer anywhere.",
+      "InitialDescription": "A wild Morty is here, its tail crackling with electricity!",
+      "IsAcquirable": true,
+      "Location": "Route 1",
+      "AsciiArt": "AsciiArt.mortyPal",
+      "Moves": ["Freak Out", "Meltdown"]
     }
   ]
 }

@@ -4,7 +4,7 @@ using AdventureS25;
 
 public class Location
 {
-    private List<Pal> pals = new List<Pal>();
+    public List<Pal> pals = new List<Pal>();
     private List<Npc> npcs = new List<Npc>();
 
     public void AddPal(Pal pal) { if (!pals.Contains(pal)) pals.Add(pal); }

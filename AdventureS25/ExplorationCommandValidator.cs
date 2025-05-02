@@ -11,7 +11,7 @@ public static class ExplorationCommandValidator
     {
         "exit", "inventory", "look", "tron", "troff",
         "nouns", "verbs", "fight", "explore", "talk", "beerme", 
-        "unbeerme", "puke", "tidyup", "teleport", "connect", "disconnect"
+        "unbeerme", "puke", "tidyup", "teleport", "connect", "disconnect", "pals"
     };
     
     public static List<string> Nouns = new List<string>

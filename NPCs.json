@@ -1,12 +1,28 @@
 {
-  "Npcs": [
+  "NPCs": [
     {
       "Name": "Matt",
       "Description": "A wise Matt with a long beard who lives in a cozy log cabin.",
       "InitialDescription": "Matt stands here, ready to greet visitors at his log cabin.",
       "IsInteractable": true,
       "Location": "Log Cabin",
-      "AsciiArt": "  O\n /|\\\n / \\" 
+      "AsciiArt": "AsciiArt.mattCharacter"
+    },
+    {
+      "Name": "Professor Jon",
+      "Description": "A local professor who studies Pals and their habitats. Seems to be perpetually on the brink of a coding breakthrough... or a mental breakdown.",
+      "InitialDescription": "Professor Jon is here, ready to give you your first Pals!",
+      "IsInteractable": true,
+      "Location": "Professor Jon's Lab",
+      "AsciiArt": "AsciiArt.jonCharacter"
+    },
+    {
+      "Name": "Nurse Noelia",
+      "Description": "A kind nurse with a calm demeanor who helps heal injured Pals.",
+      "InitialDescription": "Nurse Noelia stands behind the counter, ready to help heal your Pals.",
+      "IsInteractable": true,
+      "Location": "Pal Center",
+      "AsciiArt": "AsciiArt.nurseCharacter"
     }
   ]
 }

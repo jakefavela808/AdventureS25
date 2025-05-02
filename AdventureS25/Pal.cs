@@ -10,7 +10,10 @@ public class Pal
     public string Location { get; set; }
     public List<string> Moves { get; set; }
 
-    public Pal(string name, string description, string initialDescription, bool isAcquirable, string asciiArt, string location, List<string> moves)
+    public int HP { get; set; }
+    public int MaxHP { get; set; }
+
+    public Pal(string name, string description, string initialDescription, bool isAcquirable, string asciiArt, string location, List<string> moves, int maxHP = 50)
     {
         Name = name;
         Description = description;
@@ -19,6 +22,8 @@ public class Pal
         AsciiArt = asciiArt;
         Location = location;
         Moves = moves;
+        MaxHP = maxHP;
+        HP = maxHP;
     }
 
     public string GetLocationDescription()

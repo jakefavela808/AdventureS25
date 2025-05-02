@@ -6,10 +6,12 @@ public static class Player
 {
     public static Location CurrentLocation;
     public static List<Item> Inventory;
+    public static List<Pal> Pals = new List<Pal>();
 
     public static void Initialize()
     {
         Inventory = new List<Item>();
+        Pals = new List<Pal>();
         CurrentLocation = Map.StartLocation;
     }
 
@@ -93,6 +95,25 @@ public static class Player
         }
     }
 
+    public static void ShowPals()
+    {
+        if (Pals.Count == 0)
+        {
+            Typewriter.TypeLine("You have no Pals yet.");
+            Console.Clear();
+            Look();
+        }
+        else
+        {
+            Typewriter.TypeLine("Your Pals:");
+            foreach (Pal pal in Pals)
+            {
+                Typewriter.TypeLine($"{pal.Name} - HP: {pal.HP}/{pal.MaxHP}");
+                Typewriter.TypeLine($"{pal.Description}");
+            }
+        }
+    }
+
     public static void Look()
     {
         Console.WriteLine(CurrentLocation.GetDescription());
@@ -147,6 +168,19 @@ public static class Player
         }
         
         Inventory.Add(item);
+    }
+
+    public static void AddPal(Pal pal)
+    {
+        if (!Pals.Contains(pal))
+        {
+            Pals.Add(pal);
+        }
+    }
+
+    public static bool HasItem(string itemName)
+    {
+        return Inventory.Any(i => i.Name.ToLower() == itemName.ToLower());
     }
 
     public static void RemoveItemFromInventory(string itemName)
