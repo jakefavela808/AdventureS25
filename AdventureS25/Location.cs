@@ -4,6 +4,17 @@ using AdventureS25;
 
 public class Location
 {
+    private List<Pal> pals = new List<Pal>();
+    private List<Npc> npcs = new List<Npc>();
+
+    public void AddPal(Pal pal) { if (!pals.Contains(pal)) pals.Add(pal); }
+    public void RemovePal(Pal pal) { pals.Remove(pal); }
+    public IReadOnlyList<Pal> GetPals() => pals.AsReadOnly();
+
+    public void AddNpc(Npc npc) { if (!npcs.Contains(npc)) npcs.Add(npc); }
+    public void RemoveNpc(Npc npc) { npcs.Remove(npc); }
+    public IReadOnlyList<Npc> GetNpcs() => npcs.AsReadOnly();
+
     private string asciiArt;
 
     private string name;
@@ -49,6 +60,31 @@ public class Location
             fullDescription += asciiArt;
         }
         fullDescription += Description;
+
+        // Show NPCs in the location
+        foreach (Npc npc in npcs)
+        {
+            if (!string.IsNullOrEmpty(npc.AsciiArt))
+            {
+                fullDescription += "\n" + npc.AsciiArt;
+            }
+            if (!string.IsNullOrEmpty(npc.InitialDescription))
+            {
+                fullDescription += "\n" + npc.InitialDescription;
+            }
+        }
+        // Show Pals in the location
+        foreach (Pal pal in pals)
+        {
+            if (!string.IsNullOrEmpty(pal.AsciiArt))
+            {
+                fullDescription += "\n" + pal.AsciiArt;
+            }
+            if (!string.IsNullOrEmpty(pal.InitialDescription))
+            {
+                fullDescription += "\n" + pal.InitialDescription;
+            }
+        }
 
         foreach (Item item in Items)
         {

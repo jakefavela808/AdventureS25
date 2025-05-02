@@ -1,0 +1,12 @@
+{
+  "Npcs": [
+    {
+      "Name": "Matt",
+      "Description": "A wise Matt with a long beard who lives in a cozy log cabin.",
+      "InitialDescription": "Matt stands here, ready to greet visitors at his log cabin.",
+      "IsInteractable": true,
+      "Location": "Log Cabin",
+      "AsciiArt": "  O\n /|\\\n / \\" 
+    }
+  ]
+}

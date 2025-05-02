@@ -1,0 +1,13 @@
+{
+  "Pals": [
+    {
+      "Name": "Sandie",
+      "Description": "A Corgi-type Pal with quantum-computing capabilities.",
+      "InitialDescription": "A wild Sandie is here, its tail crackling with electricity!",
+      "IsAcquirable": true,
+      "Location": "Route 1",
+      "AsciiArt": "  /\\_/\\\n ( o.o )\n  > ^ <",
+      "Moves": ["Quantum Chomp", "Corgi Overdrive"]
+    }
+  ]
+}

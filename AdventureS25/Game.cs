@@ -55,6 +55,8 @@ public static class Game
         States.Initialize();
         Map.Initialize();
         Items.Initialize();
+        Npcs.Initialize();
+        Pals.Initialize();
         Player.Initialize();
     }
 }
