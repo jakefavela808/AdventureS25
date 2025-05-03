@@ -1,6 +1,7 @@
 namespace AdventureS25;
 
 using AdventureS25;
+using System.IO; // Potentially needed if AudioManager path logic changes
 
 public static class Player
 {
@@ -27,9 +28,11 @@ public static class Player
         }
         if (CurrentLocation.CanMoveInDirection(command))
         {
+            AudioManager.Stop(); // Stop current location's audio
             CurrentLocation = CurrentLocation.GetLocationInDirection(command);
             Console.Clear();
             Console.WriteLine(CurrentLocation.GetDescription());
+            AudioManager.PlayLooping(CurrentLocation.AudioFile); // Play new location's audio
         }
         else
         {
@@ -108,7 +111,7 @@ public static class Player
             Typewriter.TypeLine("Your Pals:");
             foreach (Pal pal in Pals)
             {
-                Typewriter.TypeLine($"{pal.Name} - HP: {pal.HP}/{pal.MaxHP}");
+                Typewriter.TypeLine($"\n{pal.Name} - HP: {pal.HP}/{pal.MaxHP}");
                 // Print resolved ASCII art above description
                 string art = pal.AsciiArt;
                 if (!string.IsNullOrEmpty(art) && art.StartsWith("AsciiArt."))
@@ -225,9 +228,10 @@ public static class Player
             return;
         }
             
+        AudioManager.Stop(); // Stop current location's audio
         // set our current location to the new location
         CurrentLocation = newLocation;
-        
+        AudioManager.PlayLooping(CurrentLocation.AudioFile); // Play new location's audio
         // print out a description of the location
         Look();
     }

@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
@@ -14,6 +14,17 @@
       </Content>
       <None Remove="Items.json" />
       <Content Include="Items.json">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="System.Windows.Extensions" Version="8.0.0" />
+    </ItemGroup>
+
+    <!-- Include audio files for runtime playback -->
+    <ItemGroup>
+      <Content Include="Audio\**\*.wav">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </Content>
     </ItemGroup>

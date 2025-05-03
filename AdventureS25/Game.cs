@@ -1,11 +1,13 @@
 namespace AdventureS25;
 
+using System.IO;
+
 public static class Game
 {
     public static void PlayGame()
     {
-        Console.Clear();
         Initialize();
+        AudioManager.PlayOnce(Map.StartupAudioFile); // Play startup audio
         bool validMenuChoice = false;
         while (!validMenuChoice)
         {
@@ -16,9 +18,11 @@ public static class Game
 
             if (mainMenuInput == "1")
             {
+                AudioManager.Stop(); // Stop startup audio if it was playing
                 validMenuChoice = true;
                 States.ChangeState(StateTypes.Exploring);
                 Console.WriteLine(Player.GetLocationDescription());
+                AudioManager.PlayLooping(Player.CurrentLocation?.AudioFile); // Play starting location audio
                 bool isPlaying = true;
                 while (isPlaying)
                 {

@@ -122,7 +122,7 @@ public static class ConversationCommandHandler
         if (!string.IsNullOrEmpty(art))
             Console.WriteLine(art);
         // Initial description
-        Typewriter.TypeLine(npc.InitialDescription);
+        Typewriter.TypeLine(npc.Description);
 
         // Professor Jon logic
         if (npc.Name == "Professor Jon")
@@ -133,14 +133,14 @@ public static class ConversationCommandHandler
                 States.ChangeState(StateTypes.Exploring);
                 return;
             }
-            Typewriter.TypeLine("Would you like to choose your starter Pal? (yes/no)");
+            Typewriter.TypeLine("Jon: Ah, shit! You're just in time, kid! *burp* I've been up all damn night coding these fuckin' Pals into existence! *burp* They're wild, they're unstable, but that's what makes 'em special! Now quit standing there like an idiot, do you want to pick your starter Pal or not?(yes/no)");
             pendingStarterChoice = "Professor Jon";
             return;
         }
         // Nurse Noelia logic
         if (npc.Name == "Nurse Noelia")
         {
-            Typewriter.TypeLine("Would you like me to heal your Pals? (yes/no)");
+            Typewriter.TypeLine("");
             pendingStarterChoice = "Nurse Noelia";
             return;
         }
@@ -201,8 +201,8 @@ public static class ConversationCommandHandler
         awaitingStarterSelection = false;
         pendingStarterChoice = null;
         Conditions.ChangeCondition(ConditionTypes.HasReceivedStarter, true);
-        States.ChangeState(StateTypes.Exploring);
         Console.Clear();
+        States.ChangeState(StateTypes.Exploring);
         Player.Look();
     }
 

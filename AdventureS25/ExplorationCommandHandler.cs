@@ -84,6 +84,8 @@ public static class ExplorationCommandHandler
         if (npcs.Any(npc => npc.Name == "Professor Jon") && Conditions.IsTrue(ConditionTypes.HasReceivedStarter))
         {
             Typewriter.TypeLine("You have already received your first Pal. Professor Jon is busy right now and doesn't have anything else for you.");
+            Console.Clear();
+            Player.Look();
             return;
         }
         ConversationCommandHandler.Talk(command);

@@ -1,40 +1,54 @@
-﻿{
+{
+  "StartupAudioFile": "Hide - Dorian Concept (Slowed x Reverbed).wav",
   "Locations": [
     {
       "Name": "Orange Town",
       "Description": "A small town with a few houses and Professor Jon's Lab.\nNorth: Route 1\n",
       "Connections": {"north": "Route 1"},
-      "AsciiArt": "AsciiArt.homeLocation"
+      "AsciiArt": "AsciiArt.homeLocation",
+      "AudioFile": "OrangeTown.wav"
     },
     {
       "Name": "Professor Jon's Lab",
       "Description": "Professor Jon's famous laboratory, filled with Pals research equipment.\nEast: Route 1\n",
       "Connections": {"east": "Route 1"},
-      "AsciiArt": "AsciiArt.laboratoryLocation"
+      "AsciiArt": "AsciiArt.laboratoryLocation",
+      "AudioFile": "Ready Pixel One.wav"
     },
     {
       "Name": "Route 1",
       "Description": "A grassy path connecting Orange Town and Viridian City. Wild Pals can be found here!\nNorth: Viridian City | East: Log Cabin | South: Orange Town | West: Professor Jon's Lab\n",
       "Connections": {"south": "Orange Town" , "north": "Viridian City", "east": "Log Cabin", "west": "Professor Jon's Lab"},
-      "AsciiArt": "AsciiArt.grasslandsLocation"
+      "AsciiArt": "AsciiArt.grasslandsLocation",
+      "AudioFile": "A Walk Along the Gates.wav"
     },
     {
       "Name": "Viridian City",
-      "Description": "A bustling city with a Pal Center and Pal Mart.\nNorth: Route 1 | East: Pal Center\n",
+      "Description": "A bustling city with a Pal Center and Pal Mart.\nSouth: Route 1 | East: Pal Center\n",
       "Connections": {"south": "Route 1", "east": "Pal Center"},
-      "AsciiArt": "AsciiArt.cityLocation"
+      "AsciiArt": "AsciiArt.cityLocation",
+      "AudioFile": "Pix - City Over Clouds.wav"
     },
     {
       "Name": "Pal Center",
       "Description": "A modern facility where Nurse Noelia heals your Pals and offers advice.\nWest: Viridian City\n",
       "Connections": {"west": "Viridian City"},
-      "AsciiArt": "AsciiArt.palCenterLocation"
+      "AsciiArt": "AsciiArt.palCenterLocation",
+      "AudioFile": "No Worries.wav"
     },
     {
       "Name": "Log Cabin",
-      "Description": "A cozy log cabin deep in the woods, home to Matt.\nSouth: Route 1\n",
-      "Connections": {"south": "Route 1"},
-      "AsciiArt": "AsciiArt.riversideCabinLocation"
+      "Description": "A cozy log cabin deep in the woods, home to Matt.\nSouth: Route 1 | East: Cave\n",
+      "Connections": {"south": "Route 1", "east": "Cave"},
+      "AsciiArt": "AsciiArt.riversideCabinLocation",
+      "AudioFile": "The Oldest Mage.wav"
+    },
+    {
+      "Name": "Cave",
+      "Description": "A dark cave deep in the woods. Echoes of dripping water can be heard in the distance, and the air is cool and damp.\nWest: Log Cabin\n",
+      "Connections": {"west": "Log Cabin"},
+      "AsciiArt": "AsciiArt.caveLocation",
+      "AudioFile": "Cave.wav"
     }
   ],
   "StartLocation": "Orange Town"

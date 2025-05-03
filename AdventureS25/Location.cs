@@ -15,7 +15,10 @@ public class Location
     public void RemoveNpc(Npc npc) { npcs.Remove(npc); }
     public IReadOnlyList<Npc> GetNpcs() => npcs.AsReadOnly();
 
-    private string asciiArt;
+    private string? asciiArt;
+
+    // Optional audio file name for this location
+    public string? AudioFile { get; set; }
 
     private string name;
     public string Description;
@@ -23,7 +26,7 @@ public class Location
     public Dictionary<string, Location> Connections;
     public List<Item> Items = new List<Item>();
     
-    public Location(string nameInput, string descriptionInput, string asciiArtInput = null)
+    public Location(string nameInput, string descriptionInput, string? asciiArtInput = null)
     {
         name = nameInput;
         Description = descriptionInput;
@@ -64,9 +67,10 @@ public class Location
         // Show NPCs in the location (no ASCII art, just initial description)
         foreach (Npc npc in npcs)
         {
-            if (!string.IsNullOrEmpty(npc.InitialDescription))
+            // Simply state that the NPC is present
+            if (npc != null) // Basic check to ensure npc object exists
             {
-                fullDescription += "\n" + npc.InitialDescription;
+                fullDescription += $"\n{npc.Name} is here!";
             }
         }
         // Show only ONE random Pal's initial description (no ASCII art)

@@ -7,6 +7,7 @@ public static class BattleManager
     private static Pal? wildPal;
     private static bool isBattleActive = false;
     private static Random rng = new Random();
+    private static string? previousLocationAudio = null; // To store the audio to resume
 
     public static bool IsBattleActive => isBattleActive;
     public static Pal PlayerPal => playerPal;
@@ -14,6 +15,11 @@ public static class BattleManager
 
     public static void StartBattle(Pal player, Pal wild)
     {
+        // Store current audio, stop it, and play battle music
+        previousLocationAudio = Player.CurrentLocation.AudioFile;
+        AudioManager.Stop();
+        AudioManager.PlayLooping("BattleMusic.wav");
+
         playerPal = player;
         wildPal = wild;
         playerPal.HP = playerPal.MaxHP;
@@ -63,6 +69,9 @@ public static class BattleManager
                 Typewriter.TypeLine("You ran away!");
                 EndBattle();
                 States.ChangeState(StateTypes.Exploring);
+                // Stop battle music and resume previous audio
+                AudioManager.Stop();
+                AudioManager.PlayLooping(previousLocationAudio);
                 return;
         }
         if (wildPal != null && wildPal.HP > 0 && isBattleActive)
@@ -117,6 +126,9 @@ public static class BattleManager
             EndBattle();
             Console.Clear();
             States.ChangeState(StateTypes.Exploring);
+            // Stop battle music and resume previous audio
+            AudioManager.Stop();
+            AudioManager.PlayLooping(previousLocationAudio);
             Player.Look();
         }
         else
@@ -164,12 +176,18 @@ public static class BattleManager
             Typewriter.TypeLine($"{playerPal.Name} fainted! You lost the battle.");
             EndBattle();
             States.ChangeState(StateTypes.Exploring);
+            // Stop battle music and resume previous audio
+            AudioManager.Stop();
+            AudioManager.PlayLooping(previousLocationAudio);
         }
         else if (wildPal.HP <= 0)
         {
             Typewriter.TypeLine($"{wildPal.Name} fainted! You won the battle!");
             EndBattle();
             States.ChangeState(StateTypes.Exploring);
+            // Stop battle music and resume previous audio
+            AudioManager.Stop();
+            AudioManager.PlayLooping(previousLocationAudio);
         }
     }
 

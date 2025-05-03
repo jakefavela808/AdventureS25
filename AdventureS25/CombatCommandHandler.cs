@@ -37,9 +37,9 @@ public static class CombatCommandHandler
         States.ChangeState(StateTypes.Fighting);
         Console.WriteLine(CommandList.combatCommands);
         // Print full battle UI/UX
-        Typewriter.TypeLine("================ BATTLE START ================");
+        Console.WriteLine("================ BATTLE START ================");
         Typewriter.TypeLine($"You send out: {playerPal.Name}!");
-        Typewriter.TypeLine(GetAsciiArt(playerPal.AsciiArt));
+        Console.WriteLine(GetAsciiArt(playerPal.AsciiArt));
         Typewriter.TypeLine($"{playerPal.Description}");
         Typewriter.TypeLine($"HP: {playerPal.HP}/{playerPal.MaxHP}");
         if (playerPal.Moves != null && playerPal.Moves.Count > 0)
@@ -48,14 +48,14 @@ public static class CombatCommandHandler
         }
         Typewriter.TypeLine("");
         Typewriter.TypeLine($"A wild {wildPal.Name} appears!");
-        Typewriter.TypeLine(GetAsciiArt(wildPal.AsciiArt));
+        Console.WriteLine(GetAsciiArt(wildPal.AsciiArt));
         Typewriter.TypeLine($"{wildPal.Description}");
         Typewriter.TypeLine($"HP: {wildPal.HP}/{wildPal.MaxHP}");
         if (wildPal.Moves != null && wildPal.Moves.Count > 0)
         {
             Typewriter.TypeLine($"Moves: {string.Join(", ", wildPal.Moves)}");
         }
-        Typewriter.TypeLine("==============================================");
+        Console.WriteLine("==============================================");
     }
     
     public static void Handle(Command command)

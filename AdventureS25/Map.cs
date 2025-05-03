@@ -9,6 +9,7 @@ public static class Map
     private static Dictionary<string, Location> nameToLocation = 
         new Dictionary<string, Location>();
     public static Location StartLocation;
+    public static string? StartupAudioFile { get; private set; } // Optional startup audio
     
     public static void Initialize()
     {
@@ -21,6 +22,7 @@ public static class Map
         Dictionary<string, Location> locations = new Dictionary<string, Location>();
         foreach (LocationJsonData location in data.Locations)
         {
+            string? audioFile = location.AudioFile; // Capture per-location audio file name
             string asciiArt = null;
             if (!string.IsNullOrEmpty(location.AsciiArt))
             {
@@ -46,7 +48,7 @@ public static class Map
                     }
                 }
             }
-            Location newLocation = AddLocation(location.Name, location.Description, asciiArt);
+            Location newLocation = AddLocation(location.Name, location.Description, asciiArt, audioFile);
             locations.Add(location.Name, newLocation);
         }
         
@@ -71,6 +73,8 @@ public static class Map
             }
         }
 
+        StartupAudioFile = data.StartupAudioFile; // Read startup audio filename
+
         if (locations.TryGetValue(data.StartLocation, out Location startLocation))
         {
             StartLocation = startLocation;
@@ -81,9 +85,10 @@ public static class Map
         }
     }
 
-    private static Location AddLocation(string locationName, string locationDescription, string asciiArt = null)
+    private static Location AddLocation(string locationName, string locationDescription, string asciiArt = null, string? audioFile = null)
     {
         Location newLocation = new Location(locationName, locationDescription, asciiArt);
+        newLocation.AudioFile = audioFile; // Assign audio file reference
         nameToLocation.Add(locationName, newLocation);
         return newLocation;
     }
