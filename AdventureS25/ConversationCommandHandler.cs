@@ -99,7 +99,7 @@ public static class ConversationCommandHandler
         // Talk to the first NPC
         Console.Clear();
         States.ChangeState(StateTypes.Talking);
-        Console.WriteLine(CommandList.conversationCommands);
+        // Console.WriteLine(CommandList.conversationCommands); // Moved to after dialogue
 
         var npc = npcs[0];
         // Approach and display art
@@ -135,18 +135,25 @@ public static class ConversationCommandHandler
             }
             Typewriter.TypeLine("Jon: Ah, shit! You're just in time, kid! *burp* I've been up all damn night coding these fuckin' Pals into existence! *burp* They're wild, they're unstable, but that's what makes 'em special! Now quit standing there like an idiot, do you want to pick your starter Pal or not?(yes/no)");
             pendingStarterChoice = "Professor Jon";
-            return;
+            // Print commands here for Professor Jon before awaiting choice
+            Console.WriteLine(CommandList.conversationCommands);
         }
         // Nurse Noelia logic
-        if (npc.Name == "Nurse Noelia")
+        else if (npc.Name == "Nurse Noelia")
         {
             Typewriter.TypeLine("");
             pendingStarterChoice = "Nurse Noelia";
-            return;
+            // Print commands here for Nurse Noelia before awaiting choice
+            Console.WriteLine(CommandList.conversationCommands);
         }
         // Default NPC
-        Typewriter.TypeLine(npc.Description);
-        States.ChangeState(StateTypes.Exploring);
+        else
+        {
+            Typewriter.TypeLine(npc.Description);
+            // Print commands here for default NPCs before returning to exploration
+            Console.WriteLine(CommandList.conversationCommands);
+            States.ChangeState(StateTypes.Exploring);
+        }
     }
 
     private static void ChooseStarter(Command command)
@@ -201,9 +208,11 @@ public static class ConversationCommandHandler
         awaitingStarterSelection = false;
         pendingStarterChoice = null;
         Conditions.ChangeCondition(ConditionTypes.HasReceivedStarter, true);
+
         Console.Clear();
         States.ChangeState(StateTypes.Exploring);
         Player.Look();
+        Typewriter.TypeLine("Now go fight your first wild Pal!"); 
     }
 
     private static void HealAllPals()

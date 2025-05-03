@@ -35,7 +35,8 @@ public static class CombatCommandHandler
         var playerPal = Player.Pals[0];
         BattleManager.StartBattle(playerPal, wildPal);
         States.ChangeState(StateTypes.Fighting);
-        Console.WriteLine(CommandList.combatCommands);
+        Console.Clear();
+        States.ChangeState(StateTypes.Fighting);
         // Print full battle UI/UX
         Console.WriteLine("================ BATTLE START ================");
         Typewriter.TypeLine($"You send out: {playerPal.Name}!");

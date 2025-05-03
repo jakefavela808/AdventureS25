@@ -55,13 +55,14 @@ public class Location
 
     public string GetDescription()
     {
-        // Add explore commands at the top
-        string fullDescription = CommandList.exploreCommands + "\n";
-        fullDescription += name + "\n";
+        string fullDescription = name + "\n";
         if (!string.IsNullOrEmpty(asciiArt))
         {
             fullDescription += asciiArt;
         }
+        // Add explore commands after art, before description
+        fullDescription += "\n" + CommandList.exploreCommands + "\n";
+
         fullDescription += Description;
 
         // Show NPCs in the location (no ASCII art, just initial description)

@@ -17,7 +17,7 @@
     {
       "Name": "note",
       "Description": "A note with a message from Professor Jon.",
-      "InitialDescription": "A note lies on the ground.",
+      "InitialDescription": "A note lies on the ground.\n",
       "IsTakeable": true,
       "Location": "Orange Town"
     }

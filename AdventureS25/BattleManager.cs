@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Threading; 
 using AdventureS25;
 
 public static class BattleManager
@@ -7,7 +9,7 @@ public static class BattleManager
     private static Pal? wildPal;
     private static bool isBattleActive = false;
     private static Random rng = new Random();
-    private static string? previousLocationAudio = null; // To store the audio to resume
+    private static string? previousLocationAudio = null; 
 
     public static bool IsBattleActive => isBattleActive;
     public static Pal PlayerPal => playerPal;
@@ -15,7 +17,6 @@ public static class BattleManager
 
     public static void StartBattle(Pal player, Pal wild)
     {
-        // Store current audio, stop it, and play battle music
         previousLocationAudio = Player.CurrentLocation.AudioFile;
         AudioManager.Stop();
         AudioManager.PlayLooping("BattleMusic.wav");
@@ -25,7 +26,6 @@ public static class BattleManager
         playerPal.HP = playerPal.MaxHP;
         wildPal.HP = wildPal.MaxHP;
         isBattleActive = true;
-        // No UI/UX output here. All battle info will be printed after the standard battle intro in the command handler.
     }
 
     private static bool playerDefending = false;
@@ -47,7 +47,6 @@ public static class BattleManager
                 int heal = 5;
                 playerPal.HP = Math.Min(playerPal.MaxHP, playerPal.HP + heal);
                 Typewriter.TypeLine($"{playerPal.Name} braces for the next attack and heals for {heal} HP!");
-                Typewriter.TypeLine($"{playerPal.Name} HP: {playerPal.HP}/{playerPal.MaxHP} | {wildPal.Name} HP: {wildPal.HP}/{wildPal.MaxHP}");
                 break;
             case "potion":
                 if (Player.HasItem("potion"))
@@ -59,7 +58,7 @@ public static class BattleManager
                 else
                 {
                     Typewriter.TypeLine("You don't have any potions!");
-                    return; // Do not skip player's turn if no potion, let them try again
+                    return; 
                 }
                 break;
             case "tame":
@@ -69,7 +68,6 @@ public static class BattleManager
                 Typewriter.TypeLine("You ran away!");
                 EndBattle();
                 States.ChangeState(StateTypes.Exploring);
-                // Stop battle music and resume previous audio
                 AudioManager.Stop();
                 AudioManager.PlayLooping(previousLocationAudio);
                 return;
@@ -77,6 +75,12 @@ public static class BattleManager
         if (wildPal != null && wildPal.HP > 0 && isBattleActive)
             EnemyTurn();
         CheckBattleEnd();
+
+        // Print final status for the round if battle is still active
+        if (isBattleActive && playerPal != null && wildPal != null)
+        {
+            PrintHpStatus();
+        }
     }
 
     private static void DoAttack(Pal attacker, Pal defender, string move, bool isSpecial = false, bool halveDamage = false)
@@ -94,11 +98,6 @@ public static class BattleManager
         else
         {
             Typewriter.TypeLine($"{attacker.Name} used {move}! {defender.Name} took {damage} damage.");
-        }
-        // Print HP of both pals after the attack
-        if (playerPal != null && wildPal != null)
-        {
-            Typewriter.TypeLine($"{playerPal.Name} HP: {playerPal.HP}/{playerPal.MaxHP} | {wildPal.Name} HP: {wildPal.HP}/{wildPal.MaxHP}");
         }
     }
 
@@ -126,10 +125,12 @@ public static class BattleManager
             EndBattle();
             Console.Clear();
             States.ChangeState(StateTypes.Exploring);
-            // Stop battle music and resume previous audio
             AudioManager.Stop();
             AudioManager.PlayLooping(previousLocationAudio);
+
             Player.Look();
+            CheckAndTriggerFirstWinTutorial();
+            
         }
         else
         {
@@ -140,16 +141,12 @@ public static class BattleManager
     private static void EnemyTurn()
     {
         if (wildPal == null || playerPal == null) return;
-        // 0: basic, 1: special, 2: defend
         int action = rng.Next(0, 3);
-        if (action == 2) // defend
+        if (action == 2) 
         {
-            // Enemy braces and heals
             int heal = 5;
             wildPal.HP = Math.Min(wildPal.MaxHP, wildPal.HP + heal);
             Typewriter.TypeLine($"{wildPal.Name} braces for the next attack and heals for {heal} HP!");
-            Typewriter.TypeLine($"{playerPal.Name} HP: {playerPal.HP}/{playerPal.MaxHP} | {wildPal.Name} HP: {wildPal.HP}/{wildPal.MaxHP}");
-            // Set a flag so next player attack is halved
             enemyDefending = true;
         }
         else
@@ -170,24 +167,37 @@ public static class BattleManager
 
     private static void CheckBattleEnd()
     {
-        if (playerPal == null || wildPal == null) return;
-        if (playerPal.HP <= 0)
+        if (!isBattleActive) return;
+
+        if (wildPal?.HP <= 0)
+        {
+            Typewriter.TypeLine($"{wildPal.Name} fainted!");
+            EndBattle();
+            Console.Clear();
+            States.ChangeState(StateTypes.Exploring);
+            AudioManager.Stop();
+            AudioManager.PlayLooping(previousLocationAudio);
+            
+            Player.Look();
+            CheckAndTriggerFirstWinTutorial();
+            
+        }
+        if (playerPal?.HP <= 0)
         {
             Typewriter.TypeLine($"{playerPal.Name} fainted! You lost the battle.");
             EndBattle();
             States.ChangeState(StateTypes.Exploring);
-            // Stop battle music and resume previous audio
             AudioManager.Stop();
             AudioManager.PlayLooping(previousLocationAudio);
         }
-        else if (wildPal.HP <= 0)
+    }
+
+    private static void CheckAndTriggerFirstWinTutorial()
+    {
+        if (Conditions.IsTrue(ConditionTypes.HasReceivedStarter) && Conditions.IsFalse(ConditionTypes.HasDefeatedFirstPal))
         {
-            Typewriter.TypeLine($"{wildPal.Name} fainted! You won the battle!");
-            EndBattle();
-            States.ChangeState(StateTypes.Exploring);
-            // Stop battle music and resume previous audio
-            AudioManager.Stop();
-            AudioManager.PlayLooping(previousLocationAudio);
+            Conditions.ChangeCondition(ConditionTypes.HasDefeatedFirstPal, true);
+            Typewriter.TypeLine("\nYour Pal looks tired! Go heal it at the Pal Center in town.");
         }
     }
 
@@ -196,5 +206,31 @@ public static class BattleManager
         isBattleActive = false;
         playerPal = null;
         wildPal = null;
+    }
+
+    private static void PrintHpStatus()
+    {
+        Console.WriteLine("----------------------------------------------");
+        // Null check for playerPal
+        if (playerPal != null)
+        {
+            Console.WriteLine($"{playerPal.Name} HP: {playerPal.HP}/{playerPal.MaxHP}");
+        }
+        else
+        {
+            Console.WriteLine("Player Pal: Fainted or Missing");
+        }
+        // Null check for wildPal
+        if (wildPal != null)
+        {
+            Console.WriteLine($"{wildPal.Name} HP: {wildPal.HP}/{wildPal.MaxHP}");
+        }
+        else
+        {
+            Console.WriteLine("Wild Pal: Fainted or Missing");
+        }
+        Console.WriteLine("----------------------------------------------");
+        // Print available combat commands here
+        Console.WriteLine(CommandList.combatCommands);
     }
 }
