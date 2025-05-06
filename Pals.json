@@ -3,7 +3,7 @@
     {
       "Name": "Sandie",
       "Description": "A Corgi-type Pal with quantum-computing capabilities. She's extremely affectionate, loyal, and always hungry.",
-      "InitialDescription": "A wild Sandie is here, its tail crackling with electricity!",
+      "InitialDescription": "A wild Sandie is here, zooming in circles and wagging her tail!",
       "IsAcquirable": true,
       "Location": "",
       "AsciiArt": "AsciiArt.sandiePal",
@@ -30,7 +30,7 @@
     {
       "Name": "Pibble",
       "Description": "A dog-type Pal with a big head. Pibble always wants to be everyone’s best friend.",
-      "InitialDescription": "A wild Pibble is here, its tail crackling with electricity!",
+      "InitialDescription": "A wild Pibble is here, grinning with a giant head and ready to play!",
       "IsAcquirable": true,
       "Location": "Route 1",
       "AsciiArt": "AsciiArt.pibblePal",
@@ -39,7 +39,7 @@
     {
       "Name": "Bark Zuckerburg",
       "Description": "A dog-type Pal with a talent for technology. Bark Zuckerburg is always plotting his next big app.",
-      "InitialDescription": "A wild Bark Zuckerburg is here, its tail crackling with electricity!",
+      "InitialDescription": "A wild Bark Zuckerburg is here, tapping away at a tiny smartphone!",
       "IsAcquirable": true,
       "Location": "Route 1",
       "AsciiArt": "AsciiArt.barkZuckerburgPal",
@@ -47,8 +47,8 @@
     },
     {
       "Name": "Morty",
-      "Description": "A dog-type Pal who’s a bit anxious but endlessly loyal. Morty always finds himself in strange situations, but he’ll follow his trainer anywhere.",
-      "InitialDescription": "A wild Morty is here, its tail crackling with electricity!",
+      "Description": "A dog-type Pal who's a nerd for Sandie. He collects Sandie comics and dreams of meeting her!", 
+      "InitialDescription": "A wild Morty is here, adjusting his glasses and quoting Sandie facts!",
       "IsAcquirable": true,
       "Location": "Route 1",
       "AsciiArt": "AsciiArt.mortyPal",

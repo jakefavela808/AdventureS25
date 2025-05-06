@@ -34,7 +34,8 @@ public static class ExplorationCommandHandler
             {"read", Read},
             {"pals", ShowPals},
             {"open", HandleOpen}, 
-            {"mute", HandleMute}   
+            {"mute", HandleMute},
+            {"unmute", HandleUnmute}   
         };
     private static void Read(Command obj)
     {
@@ -84,8 +85,8 @@ public static class ExplorationCommandHandler
     private static void ChangeToTalkState(Command command)
     {
         // Block talking to Professor Jon after starter received
-        var npcs = Player.CurrentLocation.GetNpcs();
-        if (npcs.Any(npc => npc.Name == "Professor Jon") && Conditions.IsTrue(ConditionTypes.HasReceivedStarter))
+        var npcs = Player.CurrentLocation?.GetNpcs();
+        if (npcs != null && npcs.Any(npc => npc.Name == "Professor Jon") && Conditions.IsTrue(ConditionTypes.HasReceivedStarter))
         {
             Typewriter.TypeLine("You have already received your first Pal. Professor Jon is busy right now and doesn't have anything else for you.");
             Console.Clear();
@@ -185,27 +186,45 @@ public static class ExplorationCommandHandler
 
     private static void HandleMute(Command command)
     {
-        AudioManager.ToggleMute();
-        // Feedback is provided by AudioManager.ToggleMute()
-        // Optional: Could call Player.Look() if you want the location description redisplayed,
-        // but usually, a mute command is quick and doesn't need full screen refresh.
+        if (AudioManager.IsMuted)
+        {
+            Typewriter.TypeLine("Audio is already muted.");
+        }
+        else
+        {
+            AudioManager.ToggleMute(); // This will mute and print "Audio muted."
+        }
+    }
+
+    private static void HandleUnmute(Command command)
+    {
+        if (!AudioManager.IsMuted)
+        {
+            Typewriter.TypeLine("Audio is already unmuted.");
+        }
+        else
+        {
+            AudioManager.ToggleMute(); // This will unmute and print "Audio unmuted."
+        }
     }
 
     private static void HandleOpen(Command command)
     {
-        if (string.IsNullOrEmpty(command.Noun) || command.Noun.ToLower() != "chest")
+        // Only allow opening a chest if the command is exactly 'open chest'.
+        // If the noun is missing or not 'chest', do nothing (let the parser/validator/game handle it).
+        if (string.IsNullOrWhiteSpace(command.Noun) || command.Noun.ToLower() != "chest")
         {
-            Typewriter.TypeLine("Open what? (Try 'open chest')");
             return;
         }
 
-        var chestItem = Player.CurrentLocation.Items.FirstOrDefault(item => item.Name.ToLower() == "chest");
+        // Only proceed if the noun is exactly 'chest'.
+        var chestItem = Player.CurrentLocation?.Items?.FirstOrDefault(item => item.Name.ToLower() == "chest");
 
         if (chestItem != null)
         {
             // For simplicity, we remove the chest. 
             // A more complex system might mark it as 'opened'.
-            Player.CurrentLocation.RemoveItem(chestItem); 
+            Player.CurrentLocation?.RemoveItem(chestItem); // Avoid null dereference
 
             int numPotions = random.Next(0, 3); // 0, 1, or 2 potions
             int numTreats = random.Next(0, 4);  // 0, 1, 2, or 3 treats
@@ -254,6 +273,8 @@ public static class ExplorationCommandHandler
         else
         {
             Typewriter.TypeLine("There is no unopened chest here.");
+            Console.Clear();
+            Player.Look();
         }
         // Consider if Player.Look() is needed here or if the loot message is enough.
         // For now, let the loot message be the primary feedback.

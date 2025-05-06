@@ -16,7 +16,7 @@ public static class CombatCommandHandler
     public static void Fight(Command command)
     {
         // Get the wild pal at the current location
-        var wildPal = Player.CurrentLocation.pals?.Count > 0 ? Player.CurrentLocation.pals[0] : null;
+        var wildPal = Player.CurrentLocation?.pals != null && Player.CurrentLocation.pals.Count > 0 ? Player.CurrentLocation.pals[0] : null;
         if (wildPal == null)
         {
             Typewriter.TypeLine("There is no wild Pal here to fight!");

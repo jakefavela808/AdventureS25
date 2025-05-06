@@ -49,7 +49,7 @@ public static class Items
         return newItem;
     }
 
-    public static Item GetItemByName(string itemName)
+    public static Item? GetItemByName(string itemName)
     {
         if (nameToItem.ContainsKey(itemName))
         {

@@ -63,7 +63,7 @@ public static class Map
                 }
             }
             Location newLocation = AddLocation(locationData.Name, locationData.Description, asciiArtString, audioFile);
-            locations.Add(locationData.Name, newLocation);
+            locations[locationData.Name] = newLocation;
         }
         
         // setup all the connections
@@ -120,27 +120,21 @@ public static class Map
     public static void AddItem(string itemName, string locationName)
     {
         // find out which Location is named locationName
-        Location? location = GetLocationByName(locationName);
-        Item item = Items.GetItemByName(itemName);
+        Location location = GetLocationByName(locationName)!;
+        Item item = Items.GetItemByName(itemName)!;
         
         // add the item to the location
-        if (item != null && location != null)
-        {
-            location.AddItem(item);
-        }
+        location.AddItem(item);
     }
     
     public static void RemoveItem(string itemName, string locationName)
     {
         // find out which Location is named locationName
-        Location? location = GetLocationByName(locationName);
-        Item item = Items.GetItemByName(itemName);
+        Location location = GetLocationByName(locationName)!;
+        Item item = Items.GetItemByName(itemName)!;
         
         // remove the item to the location
-        if (item != null && location != null)
-        {
-            location.RemoveItem(item);
-        }
+        location.RemoveItem(item);
     }
 
     public static Location? GetLocationByName(string locationName)

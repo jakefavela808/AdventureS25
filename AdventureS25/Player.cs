@@ -8,7 +8,7 @@ using System.Linq;
 public static class Player
 {
     public static Location? CurrentLocation;
-    public static List<Item> Inventory;
+    public static List<Item> Inventory = new List<Item>();
     public static List<Pal> Pals = new List<Pal>();
 
     public static void Initialize()
@@ -74,7 +74,7 @@ public static class Player
             return;
         }
         // figure out which item to take: turn the noun into an item
-        Item item = Items.GetItemByName(command.Noun);
+        Item? item = Items.GetItemByName(command.Noun);
 
         if (item == null)
         {
@@ -176,7 +176,7 @@ public static class Player
             Typewriter.TypeLine("Error: Current location is not set. Cannot drop items.");
             return;
         }
-        Item item = Items.GetItemByName(command.Noun);
+        Item? item = Items.GetItemByName(command.Noun);
 
         if (item == null)
         {
@@ -215,7 +215,7 @@ public static class Player
 
     public static void AddItemToInventory(string itemName)
     {
-        Item item = Items.GetItemByName(itemName);
+        Item? item = Items.GetItemByName(itemName);
 
         if (item == null)
         {
@@ -240,7 +240,7 @@ public static class Player
 
     public static void RemoveItemFromInventory(string itemName)
     {
-        Item item = Items.GetItemByName(itemName);
+        Item? item = Items.GetItemByName(itemName);
         if (item == null)
         {
             return;
@@ -251,24 +251,19 @@ public static class Player
     public static void MoveToLocation(string locationName)
     {
         // look up the location object based on the name
-        Location? newLocation = Map.GetLocationByName(locationName);
-        
-        // if there's no location with that name
-        if (newLocation == null)
+        Location? loc = Map.GetLocationByName(locationName);
+        if (loc != null)
         {
-            Typewriter.TypeLine("Trying to move to unknown location: " + locationName + ".");
-            Console.Clear();
+            CurrentLocation = loc;
+            AudioManager.Stop(); // Stop current location's audio
+            AudioManager.PlayLooping(CurrentLocation.AudioFile); // Play new location's audio
             Look();
-            return;
         }
-            
-        AudioManager.Stop(); // Stop current location's audio
-        // set our current location to the new location
-        CurrentLocation = newLocation;
-        // CurrentLocation is guaranteed non-null here if newLocation was not null
-        AudioManager.PlayLooping(CurrentLocation.AudioFile); // Play new location's audio
-        // print out a description of the location
-        Look();
+        else
+        {
+            Typewriter.TypeLine($"Error: Location '{locationName}' not found. Cannot move.");
+            Look();
+        }
     }
 
     public static void Read(Command command)

@@ -5,19 +5,19 @@ using AdventureS25;
 public static class ExplorationCommandValidator
 {
     public static List<string> Verbs = new List<string>
-        {"go", "eat", "take", "drop", "drink", "read"};
+        {"go", "eat", "take", "drop", "drink", "read", "open"};
     
     public static List<string> StandaloneVerbs = new List<string>
     {
         "exit", "inventory", "look", "tron", "troff",
         "nouns", "verbs", "fight", "explore", "talk", "beerme", 
-        "unbeerme", "puke", "tidyup", "teleport", "connect", "disconnect", "pals"
+        "unbeerme", "puke", "tidyup", "teleport", "connect", "disconnect", "pals", "mute", "unmute"
     };
     
     public static List<string> Nouns = new List<string>
     {
         "bagel", "apple", "beer", "east", "west", "north", "south",
-        "up", "down", "sword", "note"
+        "up", "down", "sword", "note", "chest"
     };
     
     public static bool IsValid(Command command)

@@ -14,6 +14,7 @@ namespace AdventureS25
         private static Process? currentMacProcess; // For macOS afplay process
         private static CancellationTokenSource? macLoopCts; // To cancel the looping task
         private static readonly object macProcessLock = new object(); // For thread-safe access to currentMacProcess
+        private static string? currentLoopingFile; // Added to store the current looping file
 
         public static bool IsMuted { get; private set; } = false;
 
@@ -24,10 +25,18 @@ namespace AdventureS25
             {
                 Stop(); // Stop any currently playing sound
                 Typewriter.TypeLine("Audio muted.");
+                Console.Clear();
+                Player.Look();
             }
             else
             {
                 Typewriter.TypeLine("Audio unmuted.");
+                Console.Clear();
+                Player.Look();
+                if (!string.IsNullOrEmpty(currentLoopingFile))
+                {
+                    PlayLooping(currentLoopingFile); // Resume looping the stored file
+                }
                 // Optional: Consider replaying current location's audio if applicable
                 // For example, if Player.CurrentLocation.AudioFile is accessible and should resume:
                 // if (Player.CurrentLocation != null && !string.IsNullOrEmpty(Player.CurrentLocation.AudioFile))
@@ -97,17 +106,42 @@ namespace AdventureS25
         // Plays a sound looping asynchronously.
         public static void PlayLooping(string? fileName)
         {
-             if (IsMuted) return;
-             if (string.IsNullOrEmpty(fileName)) return;
+            // Scenario 1: Currently muted.
+            // Update currentLoopingFile if a new fileName is provided (so unmuting plays the new desired track),
+            // but do not play any sound now.
+            if (IsMuted)
+            {
+                if (!string.IsNullOrEmpty(fileName))
+                {
+                    currentLoopingFile = fileName;
+                }
+                // If fileName is null/empty and muted, currentLoopingFile remains as it was (for unmuting to resume previous).
+                return; // Do not proceed to play.
+            }
 
+            // Scenario 2: Not muted, but fileName is null or empty.
+            // This implies a request to stop looping music and forget the track.
+            if (string.IsNullOrEmpty(fileName))
+            {
+                Stop(); // Stop any active sound.
+                currentLoopingFile = null; // Forget the looping file.
+                return;
+            }
+
+            // Scenario 3: Not muted, fileName is provided, but file doesn't exist.
             string fullPath = GetFullPath(fileName);
             if (!File.Exists(fullPath))
             {
                 Console.WriteLine($"Audio file not found: {fullPath}");
-                return; // Return early if file not found
+                Stop(); // Stop any active sound.
+                currentLoopingFile = null; // Forget the looping file as the new one is invalid.
+                return;
             }
 
-            Stop(); // Stop any currently playing sound before starting a new one
+            // Scenario 4: Not muted, fileName is valid, file exists.
+            // This is the main path to play a new looping sound.
+            Stop(); // Stop any currently playing sound (critical before starting a new loop).
+            currentLoopingFile = fileName; // Set the new file as the current looping one.
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
@@ -247,6 +281,7 @@ namespace AdventureS25
                 currentPlayer?.Dispose(); // Release resources
                 currentPlayer = null;
             }
+            // currentLoopingFile = null; // Clear the looping file when explicitly stopped, unless mute is just toggling
             // No action needed for unsupported OS if nothing was started
         }
 

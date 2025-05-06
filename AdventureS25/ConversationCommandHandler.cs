@@ -91,8 +91,8 @@ public static class ConversationCommandHandler
     public static void Talk(Command command)
     {
         // Find the NPC at the current location
-        var npcs = Player.CurrentLocation.GetNpcs();
-        if (npcs.Count == 0)
+        var npcs = Player.CurrentLocation?.GetNpcs();
+        if (npcs == null || npcs.Count == 0)
         {
             Typewriter.TypeLine("There is no one here to talk to.");
             Console.Clear();
@@ -107,7 +107,7 @@ public static class ConversationCommandHandler
         var npc = npcs[0];
         // Approach and display art
         Typewriter.TypeLine($"You approach {npc.Name}.");
-        string art = npc.AsciiArt;
+        string? art = npc.AsciiArt;
         if (!string.IsNullOrEmpty(art) && art.StartsWith("AsciiArt."))
         {
             var type = typeof(AsciiArt);
@@ -125,7 +125,7 @@ public static class ConversationCommandHandler
         if (!string.IsNullOrEmpty(art))
             Console.WriteLine(art);
         // Initial description
-        Typewriter.TypeLine(npc.Description);
+        Typewriter.TypeLine(npc.Description ?? "");
 
         // Professor Jon logic
         if (npc.Name == "Professor Jon")
@@ -144,11 +144,10 @@ public static class ConversationCommandHandler
         // Nurse Noelia logic
         else if (npc.Name == "Nurse Noelia")
         {
-            Console.WriteLine($"[DEBUG] Talking to Noelia. PlayerNeedsFirstHealFromNoelia is: {Conditions.IsTrue(ConditionTypes.PlayerNeedsFirstHealFromNoelia)}"); // DEBUG
             if (Conditions.IsTrue(ConditionTypes.PlayerNeedsFirstHealFromNoelia))
             {
                 Typewriter.TypeLine("Noelia: Oh, you poor dears! Let me get all your Pals patched up right away! And here, take this potion. If you see Matt in the Old Cabin up north, he's been feeling under the weather. This should help him.");
-                HealAllPals(); // This now correctly uses the centralized HealAllPals
+                HealAllPals(); // Automatic healing, no yes/no prompt
                 Player.AddItemToInventory("potion");
                 Conditions.ChangeCondition(ConditionTypes.PlayerNeedsFirstHealFromNoelia, false);
                 Conditions.ChangeCondition(ConditionTypes.PlayerHasPotionForMatt, true); // Player now has the potion for Matt
@@ -164,21 +163,35 @@ public static class ConversationCommandHandler
                 {
                     Typewriter.TypeLine($"(You would have gained {noeliaXpReward} XP, but you have no Pals!)");
                 }
-
-                // Set up for 'yes'/'no' regarding healing again in the future, or other interactions
+                // After quest, return to exploring
+                States.ChangeState(StateTypes.Exploring);
+                Player.Look();
+                return;
             }
             else
             {
-                Typewriter.TypeLine("Noelia: Welcome back! Would you like me to heal your Pals today?");
+                if (Player.Pals.Any() && Player.Pals.Any(p => p.HP < p.MaxHP))
+                {
+                    Typewriter.TypeLine("Noelia: Welcome back! Would you like me to heal your Pals today?");
+                    pendingStarterChoice = "Nurse Noelia";
+                }
+                else if (Player.Pals.Any())
+                {
+                    Typewriter.TypeLine("Noelia: Your Pals are already in perfect shape! If you need anything, just let me know.");
+                }
+                else
+                {
+                    Typewriter.TypeLine("Noelia: Oh! It looks like you don't have any Pals with you yet. Come back when you do, and I'll take good care of them!");
+                    Console.Clear();
+                    States.ChangeState(StateTypes.Exploring);
+                    Player.Look();
+                    return;
+                }
             }
-            
-            pendingStarterChoice = "Nurse Noelia";
-            Console.WriteLine(CommandList.conversationCommands);
         }
         // Matt's Potion Delivery Logic
         else if (npc.Name == "Matt") 
         {
-            Console.WriteLine($"[DEBUG] Talking to Matt. PlayerHasPotionForMatt is: {Conditions.IsTrue(ConditionTypes.PlayerHasPotionForMatt)}"); // DEBUG
             if (Conditions.IsTrue(ConditionTypes.PlayerHasPotionForMatt))
             {
                 if (Player.HasItem("potion"))
@@ -219,7 +232,7 @@ public static class ConversationCommandHandler
         // Default NPC
         else
         {
-            Typewriter.TypeLine(npc.Description);
+            Typewriter.TypeLine(npc.Description ?? "");
             // Print commands here for default NPCs before returning to exploration
             Console.WriteLine(CommandList.conversationCommands);
             States.ChangeState(StateTypes.Exploring);
