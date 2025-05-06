@@ -12,10 +12,29 @@ public static class Npcs
     {
         string path = Path.Combine(Environment.CurrentDirectory, "NPCs.json");
         string rawText = File.ReadAllText(path);
-        var data = JsonSerializer.Deserialize<NpcsJsonData>(rawText);
+        NpcsJsonData? data = JsonSerializer.Deserialize<NpcsJsonData>(rawText);
+
+        if (data == null || data.NPCs == null) 
+        {
+            Typewriter.TypeLine("[ERROR] NPCs.json could not be loaded or is empty/malformed.");
+            return;
+        }
+
         foreach (var npc in data.NPCs)
         {
+            if (string.IsNullOrEmpty(npc.Name))
+            {
+                Typewriter.TypeLine("[WARNING] NPC found with no name in NPCs.json. Skipping.");
+                continue;
+            }
             nameToNpc[npc.Name] = npc;
+
+            if (string.IsNullOrEmpty(npc.Location))
+            {
+                Typewriter.TypeLine($"[INFO] NPC '{npc.Name}' does not have a location specified in NPCs.json and will not be placed in the world.");
+                continue; 
+            }
+
             var location = Map.GetLocationByName(npc.Location);
             if (location != null)
             {
@@ -23,11 +42,11 @@ public static class Npcs
             }
             else
             {
-                Typewriter.TypeLine($"Warning: Location '{npc.Location}' for NPC '{npc.Name}' not found. NPC not placed in world.");
+                Typewriter.TypeLine($"[WARNING] Location '{npc.Location}' for NPC '{npc.Name}' not found. NPC not placed in world.");
             }
         }
     }
 
-    public static Npc GetNpcByName(string name) =>
+    public static Npc? GetNpcByName(string name) =>
         nameToNpc.TryGetValue(name, out var npc) ? npc : null;
 }

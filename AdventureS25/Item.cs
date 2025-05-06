@@ -1,4 +1,4 @@
-﻿namespace AdventureS25;
+namespace AdventureS25;
 
 public class Item
 {
@@ -20,7 +20,7 @@ public class Item
         ExplorationCommandValidator.AddNoun(name);
     }
 
-    public string ToString()
+    public override string ToString()
     {
         return Name + " - " + Description + " - " + IsTakeable;
     }

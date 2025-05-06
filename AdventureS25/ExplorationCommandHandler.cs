@@ -1,10 +1,12 @@
 namespace AdventureS25;
 
+using System; 
 using AdventureS25;
 using System.Linq;
 
 public static class ExplorationCommandHandler
 {
+    private static Random random = new Random(); 
     private static Dictionary<string, Action<Command>> commandMap =
         new Dictionary<string, Action<Command>>()
         {
@@ -30,7 +32,9 @@ public static class ExplorationCommandHandler
             {"connect", Connect},
             {"disconnect", Disconnect},
             {"read", Read},
-            {"pals", ShowPals}
+            {"pals", ShowPals},
+            {"open", HandleOpen}, 
+            {"mute", HandleMute}   
         };
     private static void Read(Command obj)
     {
@@ -177,5 +181,81 @@ public static class ExplorationCommandHandler
     public static void Move(Command command)
     {
         Player.Move(command);
+    }
+
+    private static void HandleMute(Command command)
+    {
+        AudioManager.ToggleMute();
+        // Feedback is provided by AudioManager.ToggleMute()
+        // Optional: Could call Player.Look() if you want the location description redisplayed,
+        // but usually, a mute command is quick and doesn't need full screen refresh.
+    }
+
+    private static void HandleOpen(Command command)
+    {
+        if (string.IsNullOrEmpty(command.Noun) || command.Noun.ToLower() != "chest")
+        {
+            Typewriter.TypeLine("Open what? (Try 'open chest')");
+            return;
+        }
+
+        var chestItem = Player.CurrentLocation.Items.FirstOrDefault(item => item.Name.ToLower() == "chest");
+
+        if (chestItem != null)
+        {
+            // For simplicity, we remove the chest. 
+            // A more complex system might mark it as 'opened'.
+            Player.CurrentLocation.RemoveItem(chestItem); 
+
+            int numPotions = random.Next(0, 3); // 0, 1, or 2 potions
+            int numTreats = random.Next(0, 4);  // 0, 1, 2, or 3 treats
+            int gainedXp = random.Next(25, 76); // 25 to 75 XP
+
+            string lootMessage = "You open the chest...";
+
+            if (numPotions == 0 && numTreats == 0 && gainedXp == 0)
+            {
+                lootMessage += "\nIt's empty!";
+            }
+            else
+            {
+                lootMessage += "\nYou find:";
+                if (numPotions > 0)
+                {
+                    for (int i = 0; i < numPotions; i++)
+                    {
+                        Player.AddItemToInventory("potion");
+                    }
+                    lootMessage += $"\n- {numPotions} potion(s)";
+                }
+                if (numTreats > 0)
+                {
+                    for (int i = 0; i < numTreats; i++)
+                    {
+                        Player.AddItemToInventory("treat");
+                    }
+                    lootMessage += $"\n- {numTreats} treat(s)";
+                }
+                if (gainedXp > 0)
+                {
+                    if (Player.Pals.Any()) // Check if the player has any Pals
+                    {
+                        Player.Pals[0].AddExperience(gainedXp); // Give XP to the first Pal
+                        // lootMessage += $"\n- {Player.Pals[0].Name} gained {gainedXp} XP"; // Redundant with Pal.AddExperience message
+                    }
+                    else
+                    {
+                        lootMessage += $"\n- {gainedXp} XP (You have no Pals to gain this XP!)";
+                    }
+                }
+            }
+            Typewriter.TypeLine(lootMessage);
+        }
+        else
+        {
+            Typewriter.TypeLine("There is no unopened chest here.");
+        }
+        // Consider if Player.Look() is needed here or if the loot message is enough.
+        // For now, let the loot message be the primary feedback.
     }
 }

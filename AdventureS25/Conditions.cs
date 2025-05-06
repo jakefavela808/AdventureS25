@@ -18,6 +18,18 @@ public static class Conditions
         // Register HasDefeatedFirstPal for tutorial
         Condition hasDefeatedFirstPal = new Condition(ConditionTypes.HasDefeatedFirstPal);
         Add(hasDefeatedFirstPal);
+
+        // Register PlayerNeedsFirstHealFromNoelia for Noelia's first quest
+        Condition playerNeedsFirstHeal = new Condition(ConditionTypes.PlayerNeedsFirstHealFromNoelia);
+        Add(playerNeedsFirstHeal);
+
+        // Register PlayerHasPotionForMatt for Matt's potion quest
+        Condition playerHasPotion = new Condition(ConditionTypes.PlayerHasPotionForMatt);
+        Add(playerHasPotion);
+
+        // Register MattHasRevealedCave for when Matt tells the player about the cave
+        Condition mattHasRevealedCave = new Condition(ConditionTypes.MattHasRevealedCave);
+        Add(mattHasRevealedCave);
         
         Condition isDrunk = new Condition(ConditionTypes.IsDrunk);
         isDrunk.AddToActivateList(ConditionActions.WriteOutput("Hic!"));

@@ -2,10 +2,12 @@ namespace AdventureS25;
 
 using AdventureS25;
 using System.IO; // Potentially needed if AudioManager path logic changes
+using System.Collections.Generic;
+using System.Linq;
 
 public static class Player
 {
-    public static Location CurrentLocation;
+    public static Location? CurrentLocation;
     public static List<Item> Inventory;
     public static List<Pal> Pals = new List<Pal>();
 
@@ -13,13 +15,21 @@ public static class Player
     {
         Inventory = new List<Item>();
         Pals = new List<Pal>();
-        CurrentLocation = Map.StartLocation;
+        CurrentLocation = Map.StartLocation; 
+        // It's crucial that the game's main loop or startup sequence checks if Player.CurrentLocation is null after this
+        // and handles it appropriately (e.g., by exiting or showing an error if the map couldn't be initialized).
     }
 
     public static void Move(Command command)
     {
+        if (CurrentLocation == null)
+        {
+            Typewriter.TypeLine("Error: Current location is not set. Cannot move.");
+            return;
+        }
+
         // Only require HasReadNote condition
-        if (CurrentLocation == Map.StartLocation && !Conditions.IsTrue(ConditionTypes.HasReadNote))
+        if (CurrentLocation == Map.StartLocation && !Conditions.IsTrue(ConditionTypes.HasReadNote)) // Map.StartLocation can also be null
         {
             Typewriter.TypeLine("You should read the note before leaving!");
             Console.Clear();
@@ -29,7 +39,16 @@ public static class Player
         if (CurrentLocation.CanMoveInDirection(command))
         {
             AudioManager.Stop(); // Stop current location's audio
-            CurrentLocation = CurrentLocation.GetLocationInDirection(command);
+            Location? newLocation = CurrentLocation.GetLocationInDirection(command);
+            if (newLocation == null)
+            {
+                Typewriter.TypeLine("Error: Tried to move to a null location.");
+                // Potentially log this error for debugging map connections
+                Console.Clear();
+                Look(); // Show current location again
+                return;
+            }
+            CurrentLocation = newLocation;
             Console.Clear();
             Console.WriteLine(CurrentLocation.GetDescription());
             AudioManager.PlayLooping(CurrentLocation.AudioFile); // Play new location's audio
@@ -44,11 +63,16 @@ public static class Player
 
     public static string GetLocationDescription()
     {
-        return CurrentLocation.GetDescription();
+        return CurrentLocation?.GetDescription() ?? "You are in an unknown void. Something is wrong.";
     }
 
     public static void Take(Command command)
     {
+        if (CurrentLocation == null)
+        {
+            Typewriter.TypeLine("Error: Current location is not set. Cannot take items.");
+            return;
+        }
         // figure out which item to take: turn the noun into an item
         Item item = Items.GetItemByName(command.Noun);
 
@@ -103,6 +127,11 @@ public static class Player
         if (Pals.Count == 0)
         {
             Typewriter.TypeLine("You have no Pals yet.");
+            if (CurrentLocation == null) 
+            { 
+                Console.WriteLine("Error: Current location is unknown."); 
+                return; 
+            }
             Console.Clear();
             Look();
         }
@@ -137,11 +166,16 @@ public static class Player
 
     public static void Look()
     {
-        Console.WriteLine(CurrentLocation.GetDescription());
+        Console.WriteLine(CurrentLocation?.GetDescription() ?? "You are in an unknown void. Something is wrong.");
     }
 
     public static void Drop(Command command)
     {       
+        if (CurrentLocation == null)
+        {
+            Typewriter.TypeLine("Error: Current location is not set. Cannot drop items.");
+            return;
+        }
         Item item = Items.GetItemByName(command.Noun);
 
         if (item == null)
@@ -217,7 +251,7 @@ public static class Player
     public static void MoveToLocation(string locationName)
     {
         // look up the location object based on the name
-        Location newLocation = Map.GetLocationByName(locationName);
+        Location? newLocation = Map.GetLocationByName(locationName);
         
         // if there's no location with that name
         if (newLocation == null)
@@ -231,6 +265,7 @@ public static class Player
         AudioManager.Stop(); // Stop current location's audio
         // set our current location to the new location
         CurrentLocation = newLocation;
+        // CurrentLocation is guaranteed non-null here if newLocation was not null
         AudioManager.PlayLooping(CurrentLocation.AudioFile); // Play new location's audio
         // print out a description of the location
         Look();
@@ -238,20 +273,35 @@ public static class Player
 
     public static void Read(Command command)
     {
-        if (Inventory.Contains(Items.GetItemByName("note"))) {
-    Console.Clear();
-    Look();
-    Typewriter.TypeLine("Dear Adventurer,\n\nListen up fucker! I heard you're trying to become some kind of Pal Tamer or whatever. GOOD NEWS! I'm gonna help you not completely suck at it! I've been studying this AMAZING new Pal specimen that's perfect for beginners.\n\nGet your ass over to my Fusion Lab ASAP!!! Don't make me come find you, because I WILL, and you WON'T like it! This is important COMPUTER SCIENCE happening here!\n\nSincerely, \nProf. Jon (the smartest Computer Scientist in this dimension)");
-    Inventory.Remove(Items.GetItemByName("note"));
-    Conditions.ChangeCondition(ConditionTypes.HasReadNote, true);
-    Console.Clear();
-    Look();
-}
+        Item? noteItem = Items.GetItemByName("note");
+        if (noteItem != null && Inventory.Contains(noteItem)) { 
+            Console.Clear();
+            Look();
+            Typewriter.TypeLine("Dear Adventurer,\n\nListen up fucker! I heard you're trying to become some kind of Pal Tamer or whatever. GOOD NEWS! I'm gonna help you not completely suck at it! I've been studying this AMAZING new Pal specimen that's perfect for beginners.\n\nGet your ass over to my Fusion Lab ASAP!!! Don't make me come find you, because I WILL, and you WON'T like it! This is important COMPUTER SCIENCE happening here!\n\nSincerely, \nProf. Jon (the smartest Computer Scientist in this dimension)");
+            Inventory.Remove(noteItem);
+            Conditions.ChangeCondition(ConditionTypes.HasReadNote, true);
+            Console.Clear();
+            Look();
+        }
         else
         {
             Typewriter.TypeLine("You don't have a note to read.");
             Console.Clear();
             Look();
         }
+    }
+
+    public static bool DoFullPartyHeal()
+    {
+        if (Pals.Count == 0)
+        {
+            return false; // No pals to heal
+        }
+
+        foreach (var pal in Pals)
+        {
+            pal.HP = pal.MaxHP;
+        }
+        return true; // Healing was performed
     }
 }

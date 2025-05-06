@@ -12,8 +12,8 @@ public static class BattleManager
     private static string? previousLocationAudio = null; 
 
     public static bool IsBattleActive => isBattleActive;
-    public static Pal PlayerPal => playerPal;
-    public static Pal WildPal => wildPal;
+    public static Pal? PlayerPal => playerPal;
+    public static Pal? WildPal => wildPal;
 
     public static void StartBattle(Pal player, Pal wild)
     {
@@ -23,12 +23,12 @@ public static class BattleManager
 
         playerPal = player;
         wildPal = wild;
-        playerPal.HP = playerPal.MaxHP;
-        wildPal.HP = wildPal.MaxHP;
+        // playerPal.HP = playerPal.MaxHP; // Player's Pal HP should persist from outside battle
+        wildPal.HP = wildPal.MaxHP;   // Wild Pal HP is reset for each new encounter
         isBattleActive = true;
     }
 
-    private static bool playerDefending = false;
+    // private static bool playerDefending = false;
     private static bool enemyDefending = false;
 
     public static void HandlePlayerAction(string action)
@@ -43,7 +43,7 @@ public static class BattleManager
                 DoAttack(playerPal, wildPal, playerPal.Moves?.Count > 1 ? playerPal.Moves[1] : "Special Attack", isSpecial:true);
                 break;
             case "defend":
-                playerDefending = true;
+                // playerDefending = true;
                 int heal = 5;
                 playerPal.HP = Math.Min(playerPal.MaxHP, playerPal.HP + heal);
                 Typewriter.TypeLine($"{playerPal.Name} braces for the next attack and heals for {heal} HP!");
@@ -68,6 +68,7 @@ public static class BattleManager
                 Typewriter.TypeLine("You ran away!");
                 EndBattle();
                 States.ChangeState(StateTypes.Exploring);
+                Player.Look();
                 AudioManager.Stop();
                 AudioManager.PlayLooping(previousLocationAudio);
                 return;
@@ -93,7 +94,7 @@ public static class BattleManager
         defender.HP -= damage;
         if (halveDamage)
         {
-            Typewriter.TypeLine($"{attacker.Name} used {move}! {defender.Name} braced and took only {damage} damage.");
+            Typewriter.TypeLine($"\n{attacker.Name} used {move}! {defender.Name} braced and took only {damage} damage.");
         }
         else
         {
@@ -113,6 +114,8 @@ public static class BattleManager
         if (wild == null)
         {
             Typewriter.TypeLine("There is no wild Pal to tame.");
+            Console.Clear();
+            Player.Look();
             return;
         }
         int chance = 30 + (100 * (wild.MaxHP - wild.HP) / wild.MaxHP);
@@ -123,7 +126,6 @@ public static class BattleManager
             Player.AddPal(wild);
             Player.CurrentLocation.RemovePal(wild);
             EndBattle();
-            Console.Clear();
             States.ChangeState(StateTypes.Exploring);
             AudioManager.Stop();
             AudioManager.PlayLooping(previousLocationAudio);
@@ -173,7 +175,6 @@ public static class BattleManager
         {
             Typewriter.TypeLine($"{wildPal.Name} fainted!");
             EndBattle();
-            Console.Clear();
             States.ChangeState(StateTypes.Exploring);
             AudioManager.Stop();
             AudioManager.PlayLooping(previousLocationAudio);
@@ -187,6 +188,7 @@ public static class BattleManager
             Typewriter.TypeLine($"{playerPal.Name} fainted! You lost the battle.");
             EndBattle();
             States.ChangeState(StateTypes.Exploring);
+            Player.Look();
             AudioManager.Stop();
             AudioManager.PlayLooping(previousLocationAudio);
         }
@@ -197,6 +199,8 @@ public static class BattleManager
         if (Conditions.IsTrue(ConditionTypes.HasReceivedStarter) && Conditions.IsFalse(ConditionTypes.HasDefeatedFirstPal))
         {
             Conditions.ChangeCondition(ConditionTypes.HasDefeatedFirstPal, true);
+            Conditions.ChangeCondition(ConditionTypes.PlayerNeedsFirstHealFromNoelia, true); // Set Noelia's trigger
+            Console.WriteLine("[DEBUG] BattleManager: PlayerNeedsFirstHealFromNoelia set to true."); // DEBUG
             Typewriter.TypeLine("\nYour Pal looks tired! Go heal it at the Pal Center in town.");
         }
     }
@@ -210,7 +214,6 @@ public static class BattleManager
 
     private static void PrintHpStatus()
     {
-        Console.WriteLine("----------------------------------------------");
         // Null check for playerPal
         if (playerPal != null)
         {
@@ -229,7 +232,6 @@ public static class BattleManager
         {
             Console.WriteLine("Wild Pal: Fainted or Missing");
         }
-        Console.WriteLine("----------------------------------------------");
         // Print available combat commands here
         Console.WriteLine(CommandList.combatCommands);
     }

@@ -1,4 +1,4 @@
-﻿{
+{
   "Items": [
     {
       "Name": "treat",
@@ -20,7 +20,13 @@
       "InitialDescription": "A note lies on the ground.",
       "IsTakeable": true,
       "Location": "Orange Town"
+    },
+    {
+      "Name": "chest",
+      "Description": "A mysterious chest.",
+      "InitialDescription": "A chest sits here, waiting to be opened.",
+      "IsTakeable": false,
+      "Location": "Cave"
     }
   ]
 }
-

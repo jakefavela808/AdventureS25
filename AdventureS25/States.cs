@@ -4,7 +4,7 @@ using AdventureS25;
 
 public static class States
 {
-    public static State CurrentState { get; set; }
+    public static State? CurrentState { get; set; }
     
     public static StateTypes CurrentStateType { get; set; }
     

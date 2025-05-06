@@ -3,5 +3,5 @@ using AdventureS25;
 
 public class PalsJsonData
 {
-    public List<Pal> Pals { get; set; }
+    public List<Pal>? Pals { get; set; }
 }

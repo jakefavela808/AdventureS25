@@ -26,7 +26,7 @@ public static class ConversationCommandHandler
         // No need to parse 'choose' as a command anymore
     }
 
-    private static string pendingStarterChoice = null;
+    private static string? pendingStarterChoice = null;
     private static bool awaitingStarterSelection = false;
 
     public static bool IsAwaitingStarterSelection()
@@ -84,6 +84,8 @@ public static class ConversationCommandHandler
         pendingStarterChoice = null;
         awaitingStarterSelection = false;
         States.ChangeState(StateTypes.Exploring);
+        Player.Look();
+        
     }
 
     public static void Talk(Command command)
@@ -93,7 +95,8 @@ public static class ConversationCommandHandler
         if (npcs.Count == 0)
         {
             Typewriter.TypeLine("There is no one here to talk to.");
-            States.ChangeState(StateTypes.Exploring);
+            Console.Clear();
+            Player.Look();
             return;
         }
         // Talk to the first NPC
@@ -133,7 +136,7 @@ public static class ConversationCommandHandler
                 States.ChangeState(StateTypes.Exploring);
                 return;
             }
-            Typewriter.TypeLine("Jon: Ah, shit! You're just in time, kid! *burp* I've been up all damn night coding these fuckin' Pals into existence! *burp* They're wild, they're unstable, but that's what makes 'em special! Now quit standing there like an idiot, do you want to pick your starter Pal or not?(yes/no)");
+            Typewriter.TypeLine("Jon: Ah, shit! You're just in time, kid! I've been up all damn night coding these fuckin' Pals into existence! They're wild, they're unstable, but that's what makes 'em special! Now quit standing there like an idiot, do you want to pick your starter Pal or not?");
             pendingStarterChoice = "Professor Jon";
             // Print commands here for Professor Jon before awaiting choice
             Console.WriteLine(CommandList.conversationCommands);
@@ -141,10 +144,77 @@ public static class ConversationCommandHandler
         // Nurse Noelia logic
         else if (npc.Name == "Nurse Noelia")
         {
-            Typewriter.TypeLine("");
+            Console.WriteLine($"[DEBUG] Talking to Noelia. PlayerNeedsFirstHealFromNoelia is: {Conditions.IsTrue(ConditionTypes.PlayerNeedsFirstHealFromNoelia)}"); // DEBUG
+            if (Conditions.IsTrue(ConditionTypes.PlayerNeedsFirstHealFromNoelia))
+            {
+                Typewriter.TypeLine("Noelia: Oh, you poor dears! Let me get all your Pals patched up right away! And here, take this potion. If you see Matt in the Old Cabin up north, he's been feeling under the weather. This should help him.");
+                HealAllPals(); // This now correctly uses the centralized HealAllPals
+                Player.AddItemToInventory("potion");
+                Conditions.ChangeCondition(ConditionTypes.PlayerNeedsFirstHealFromNoelia, false);
+                Conditions.ChangeCondition(ConditionTypes.PlayerHasPotionForMatt, true); // Player now has the potion for Matt
+
+                // Award XP for completing Noelia's initial interaction
+                int noeliaXpReward = 50;
+                if (Player.Pals.Any())
+                {
+                    Player.Pals[0].AddExperience(noeliaXpReward);
+                    Typewriter.TypeLine($"(Your team gained {noeliaXpReward} XP from Nurse Noelia's help!)");
+                }
+                else
+                {
+                    Typewriter.TypeLine($"(You would have gained {noeliaXpReward} XP, but you have no Pals!)");
+                }
+
+                // Set up for 'yes'/'no' regarding healing again in the future, or other interactions
+            }
+            else
+            {
+                Typewriter.TypeLine("Noelia: Welcome back! Would you like me to heal your Pals today?");
+            }
+            
             pendingStarterChoice = "Nurse Noelia";
-            // Print commands here for Nurse Noelia before awaiting choice
             Console.WriteLine(CommandList.conversationCommands);
+        }
+        // Matt's Potion Delivery Logic
+        else if (npc.Name == "Matt") 
+        {
+            Console.WriteLine($"[DEBUG] Talking to Matt. PlayerHasPotionForMatt is: {Conditions.IsTrue(ConditionTypes.PlayerHasPotionForMatt)}"); // DEBUG
+            if (Conditions.IsTrue(ConditionTypes.PlayerHasPotionForMatt))
+            {
+                if (Player.HasItem("potion"))
+                {
+                    Typewriter.TypeLine("Matt: *cough* Is that... a potion? From Noelia? Oh, thank goodness! I was starting to think I'd be stuck like this forever.");
+                    Player.RemoveItemFromInventory("potion");
+                    Conditions.ChangeCondition(ConditionTypes.PlayerHasPotionForMatt, false); // Quest to deliver potion completed
+                    Typewriter.TypeLine("Matt: Thanks, friend. I owe you one. Say... I know a secret. There's an old chest hidden in a cave not too far from here. Might be something good in it for ya. Just head east from my cabin, can't miss it.");
+                    Conditions.ChangeCondition(ConditionTypes.MattHasRevealedCave, true);
+
+                    // Award XP for delivering the potion to Matt
+                    int mattXpReward = 75;
+                    if (Player.Pals.Any())
+                    {
+                        Player.Pals[0].AddExperience(mattXpReward);
+                        Typewriter.TypeLine($"(Your team gained {mattXpReward} XP for helping Matt!)");
+                    }
+                    else
+                    {
+                        Typewriter.TypeLine($"(You would have gained {mattXpReward} XP, but you have no Pals!)");
+                    }
+                }
+                else
+                {
+                    Typewriter.TypeLine("Matt: Noelia said you might have something for me, but it looks like you don't have that potion on you right now. Did you lose it?");
+                }
+            }
+            else
+            {
+                // Default dialogue if player doesn't have the potion task or has already completed it.
+                Typewriter.TypeLine("Matt: Urgh... just trying to rest here. This old cabin isn't doing my cough any favors.");
+            }
+            // After Matt's interaction, return to exploring
+            States.ChangeState(StateTypes.Exploring);
+            Player.Look();
+            // No pending choice for Matt, so don't print conversation commands or set pendingStarterChoice
         }
         // Default NPC
         else
@@ -208,33 +278,28 @@ public static class ConversationCommandHandler
         awaitingStarterSelection = false;
         pendingStarterChoice = null;
         Conditions.ChangeCondition(ConditionTypes.HasReceivedStarter, true);
-
-        Console.Clear();
         States.ChangeState(StateTypes.Exploring);
         Player.Look();
-        Typewriter.TypeLine("Now go fight your first wild Pal!"); 
+        Typewriter.TypeLine("Jon: Now go fight your first wild Pal!"); 
     }
 
     private static void HealAllPals()
     {
-        if (Player.Pals.Count == 0)
+        if (Player.DoFullPartyHeal()) // Call the new Player method
         {
-            Typewriter.TypeLine("You have no Pals to heal.");
+            Typewriter.TypeLine("All your Pals have been fully healed!");
         }
         else
         {
-            foreach (var pal in Player.Pals)
-            {
-                pal.HP = pal.MaxHP;
-            }
-            Typewriter.TypeLine("All your Pals have been fully healed!");
+            Typewriter.TypeLine("You have no Pals to heal.");
         }
         pendingStarterChoice = null;
         States.ChangeState(StateTypes.Exploring);
+        Player.Look();
     }
 
     private static void PromptStarterSelection()
     {
-        Typewriter.TypeLine("Please choose your starter pal:\n1. Sandie\n2. Clyde Capybara\n3. Gloop Glorp");
+        Typewriter.TypeLine("\nPlease choose your starter pal:\n1. Sandie\n2. Clyde Capybara\n3. Gloop Glorp");
     }
 }
