@@ -229,16 +229,13 @@ public static class ExplorationCommandHandler
             int numPotions = random.Next(0, 3); // 0, 1, or 2 potions
             int numTreats = random.Next(0, 4);  // 0, 1, 2, or 3 treats
             int gainedXp = random.Next(25, 76); // 25 to 75 XP
-
-            string lootMessage = "You open the chest...";
-
+            string lootMessage = "You find: ";
             if (numPotions == 0 && numTreats == 0 && gainedXp == 0)
             {
                 lootMessage += "\nIt's empty!";
             }
             else
             {
-                lootMessage += "\nYou find:";
                 if (numPotions > 0)
                 {
                     for (int i = 0; i < numPotions; i++)
@@ -268,7 +265,9 @@ public static class ExplorationCommandHandler
                     }
                 }
             }
-            Typewriter.TypeLine(lootMessage);
+            Typewriter.TypeLine("Opening chest...");
+            ChestAnimation();
+            Typewriter.TypeLine($"{lootMessage}");
         }
         else
         {
@@ -278,5 +277,20 @@ public static class ExplorationCommandHandler
         }
         // Consider if Player.Look() is needed here or if the loot message is enough.
         // For now, let the loot message be the primary feedback.
+    }
+
+    public static void ChestAnimation()
+    {
+        for (int i = 0; i < 10; i++)
+        {
+            Console.WriteLine(AsciiArt.chest);
+            Thread.Sleep(100);
+            Console.Clear();
+            Player.Look();
+            Console.WriteLine(AsciiArt.chestInverted);
+            Thread.Sleep(100);
+            Console.Clear();
+            Player.Look();
+        }
     }
 }
