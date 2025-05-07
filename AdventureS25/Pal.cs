@@ -1,6 +1,7 @@
 namespace AdventureS25;
 
 using System;
+using System.Collections.Generic;
 
 public class Pal
 {
@@ -19,6 +20,11 @@ public class Pal
     public int ExperiencePoints { get; private set; }
     public int ExperienceToNextLevel { get; private set; }
 
+    public int MaxBasicAttackUses { get; set; }
+    public int BasicAttackUses { get; set; }
+    public int MaxSpecialAttackUses { get; set; }
+    public int SpecialAttackUses { get; set; }
+
     public Pal(string name, string description, string initialDescription, bool isAcquirable, string asciiArt, string location, List<string> moves, int maxHP = 50)
     {
         Name = name;
@@ -34,6 +40,11 @@ public class Pal
         Level = 1;
         ExperiencePoints = 0;
         ExperienceToNextLevel = 100; // Initial XP for next level
+
+        MaxBasicAttackUses = 15; // Default max basic attack uses
+        BasicAttackUses = MaxBasicAttackUses;
+        MaxSpecialAttackUses = 5;  // Default max special attack uses
+        SpecialAttackUses = MaxSpecialAttackUses;
     }
 
     public void AddExperience(int amount)

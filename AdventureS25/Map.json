@@ -3,7 +3,7 @@
   "Locations": [
     {
       "Name": "Orange Town",
-      "Description": "A small town with a few houses and Professor Jon's Lab.\nNorth: Route 1\n",
+      "Description": "A small town with a few houses.\nNorth: Route 1\n",
       "Connections": {"north": "Route 1"},
       "AsciiArt": "AsciiArt.homeLocation",
       "AudioFile": "OrangeTown.wav"

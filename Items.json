@@ -12,15 +12,21 @@
       "Description": "A spray-type medicine for treating wounds. It restores the HP of one Pals by 20 points.",
       "InitialDescription": "A potion sits here, perfect for healing your Pals.",
       "IsTakeable": true,
-      "Location": "Pal Center"
+      "Location": ""
     },
     {
       "Name": "note",
       "Description": "A note with a message from Professor Jon.",
-      "InitialDescription": "A note lies on the ground.\n",
+      "InitialDescription": "A note lies on the ground.",
       "IsTakeable": true,
       "Location": "Orange Town"
+    },
+    {
+      "Name": "chest",
+      "Description": "A mysterious chest.",
+      "InitialDescription": "A chest sits here, waiting to be opened.",
+      "IsTakeable": false,
+      "Location": "Cave"
     }
   ]
 }
-

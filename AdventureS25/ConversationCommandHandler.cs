@@ -38,9 +38,10 @@ public static class ConversationCommandHandler
     {
         if (pendingStarterChoice == "Nurse Noelia")
         {
-            HealAllPals();
+            HealAllPals(); 
             pendingStarterChoice = null;
             States.ChangeState(StateTypes.Exploring);
+            Player.Look();
         }
         else if (pendingStarterChoice == "Professor Jon")
         {
@@ -146,8 +147,9 @@ public static class ConversationCommandHandler
         {
             if (Conditions.IsTrue(ConditionTypes.PlayerNeedsFirstHealFromNoelia))
             {
-                Typewriter.TypeLine("Noelia: Oh, you poor dears! Let me get all your Pals patched up right away! And here, take this potion. If you see Matt in the Old Cabin up north, he's been feeling under the weather. This should help him.");
+                Typewriter.TypeLine("Noelia: Welcome to the Pal Center! I see you're in need of some healing. Let me take care of that right away!");
                 HealAllPals(); // Automatic healing, no yes/no prompt
+                Typewriter.TypeLine("Noelia: Can you do me a favor? Take this potion to Matt in the creepy Old Cabin, I'm too scared to go there. He's been feeling under the weather and this should help him.");
                 Player.AddItemToInventory("potion");
                 Conditions.ChangeCondition(ConditionTypes.PlayerNeedsFirstHealFromNoelia, false);
                 Conditions.ChangeCondition(ConditionTypes.PlayerHasPotionForMatt, true); // Player now has the potion for Matt
@@ -156,17 +158,29 @@ public static class ConversationCommandHandler
                 int noeliaXpReward = 50;
                 if (Player.Pals.Any())
                 {
-                    Player.Pals[0].AddExperience(noeliaXpReward);
-                    Typewriter.TypeLine($"(Your team gained {noeliaXpReward} XP from Nurse Noelia's help!)");
+                    Pal? chosenPal;
+                    if (Player.Pals.Count == 1)
+                    {
+                        chosenPal = Player.Pals[0];
+                    }
+                    else
+                    {
+                        chosenPal = Player.PromptPalSelection(Player.Pals, "Which Pal should receive the XP?");
+                    }
+                    if (chosenPal != null)
+                    {
+                        chosenPal.AddExperience(noeliaXpReward);
+                        Typewriter.TypeLine($"{chosenPal.Name} gained {noeliaXpReward} XP from Nurse Noelia's help!");
+                    }
+                    Typewriter.TypeLine("Now go deliver this potion to Matt, he needs it badly!");
                 }
                 else
                 {
                     Typewriter.TypeLine($"(You would have gained {noeliaXpReward} XP, but you have no Pals!)");
                 }
-                // After quest, return to exploring
-                States.ChangeState(StateTypes.Exploring);
-                Player.Look();
-                return;
+                States.ChangeState(StateTypes.Exploring); 
+                Player.Look(); 
+                return; 
             }
             else
             {
@@ -306,9 +320,6 @@ public static class ConversationCommandHandler
         {
             Typewriter.TypeLine("You have no Pals to heal.");
         }
-        pendingStarterChoice = null;
-        States.ChangeState(StateTypes.Exploring);
-        Player.Look();
     }
 
     private static void PromptStarterSelection()

@@ -233,6 +233,37 @@ public static class Player
         }
     }
 
+    public static List<Pal> GetAvailablePals()
+    {
+        return Pals.Where(p => p.HP > 0).ToList();
+    }
+
+    // Prompts the player to select a Pal from a provided list
+    public static Pal? PromptPalSelection(List<Pal> palList, string prompt)
+    {
+        if (palList == null || palList.Count == 0)
+        {
+            Typewriter.TypeLine("No available Pals to select.");
+            return null;
+        }
+        while (true)
+        {
+            Typewriter.TypeLine(prompt);
+            for (int i = 0; i < palList.Count; i++)
+            {
+                var pal = palList[i];
+                Typewriter.TypeLine($"{i + 1}. {pal.Name} (HP: {pal.HP}/{pal.MaxHP})");
+            }
+            Typewriter.TypeLine("Enter the number of your choice:");
+            string? input = CommandProcessor.GetInput();
+            if (int.TryParse(input, out int selection) && selection >= 1 && selection <= palList.Count)
+            {
+                return palList[selection - 1];
+            }
+            Typewriter.TypeLine("Invalid selection. Please try again.");
+        }
+    }
+
     public static bool HasItem(string itemName)
     {
         return Inventory.Any(i => i.Name.ToLower() == itemName.ToLower());
@@ -240,12 +271,12 @@ public static class Player
 
     public static void RemoveItemFromInventory(string itemName)
     {
-        Item? item = Items.GetItemByName(itemName);
-        if (item == null)
+        // Remove the first item in inventory whose name matches, case-insensitive
+        var itemToRemove = Inventory.FirstOrDefault(i => i.Name.Equals(itemName, StringComparison.OrdinalIgnoreCase));
+        if (itemToRemove != null)
         {
-            return;
+            Inventory.Remove(itemToRemove);
         }
-        Inventory.Remove(item);
     }
 
     public static void MoveToLocation(string locationName)
@@ -296,6 +327,8 @@ public static class Player
         foreach (var pal in Pals)
         {
             pal.HP = pal.MaxHP;
+            pal.BasicAttackUses = pal.MaxBasicAttackUses;
+            pal.SpecialAttackUses = pal.MaxSpecialAttackUses;
         }
         return true; // Healing was performed
     }

@@ -5,7 +5,7 @@ namespace AdventureS25;
 public static class Items
 {
     private static Dictionary<string, Item> nameToItem = 
-        new Dictionary<string, Item>();
+        new Dictionary<string, Item>(StringComparer.OrdinalIgnoreCase);
     
     public static void Initialize()
     {
@@ -45,12 +45,13 @@ public static class Items
         Item newItem = new Item(name,
             description, 
             initialDescription, isTakeable);
-        nameToItem.Add(name, newItem);
+        nameToItem[name.ToLower()] = newItem;
         return newItem;
     }
 
     public static Item? GetItemByName(string itemName)
     {
+        itemName = itemName.ToLower();
         if (nameToItem.ContainsKey(itemName))
         {
             return nameToItem[itemName];

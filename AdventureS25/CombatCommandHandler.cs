@@ -37,13 +37,14 @@ public static class CombatCommandHandler
         States.ChangeState(StateTypes.Fighting);
         // Print full battle UI/UX
         Console.WriteLine("================ BATTLE START ================");
-        Typewriter.TypeLine($"You send out: {playerPal.Name}!");
         Console.WriteLine(GetAsciiArt(playerPal.AsciiArt));
         Typewriter.TypeLine($"{playerPal.Description}");
         Typewriter.TypeLine($"HP: {playerPal.HP}/{playerPal.MaxHP}");
         if (playerPal.Moves != null && playerPal.Moves.Count > 0)
         {
-            Typewriter.TypeLine($"Moves: {string.Join(", ", playerPal.Moves)}");
+            string basicMoveDisplay = playerPal.Moves.Count > 0 ? $"{playerPal.Moves[0]} ({playerPal.BasicAttackUses}/{playerPal.MaxBasicAttackUses})" : "N/A";
+            string specialMoveDisplay = playerPal.Moves.Count > 1 ? $"{playerPal.Moves[1]} ({playerPal.SpecialAttackUses}/{playerPal.MaxSpecialAttackUses})" : "N/A";
+            Typewriter.TypeLine($"Moves: {basicMoveDisplay}, {specialMoveDisplay}");
         }
         Typewriter.TypeLine("");
         Typewriter.TypeLine($"A wild {wildPal.Name} appears!");
@@ -52,7 +53,9 @@ public static class CombatCommandHandler
         Typewriter.TypeLine($"HP: {wildPal.HP}/{wildPal.MaxHP}");
         if (wildPal.Moves != null && wildPal.Moves.Count > 0)
         {
-            Typewriter.TypeLine($"Moves: {string.Join(", ", wildPal.Moves)}");
+            string basicMoveDisplay = wildPal.Moves.Count > 0 ? $"{wildPal.Moves[0]} ({wildPal.BasicAttackUses}/{wildPal.MaxBasicAttackUses})" : "N/A";
+            string specialMoveDisplay = wildPal.Moves.Count > 1 ? $"{wildPal.Moves[1]} ({wildPal.SpecialAttackUses}/{wildPal.MaxSpecialAttackUses})" : "N/A";
+            Typewriter.TypeLine($"Moves: {basicMoveDisplay}, {specialMoveDisplay}");
         }
         Console.WriteLine(CommandList.combatCommands);
     }
@@ -68,18 +71,50 @@ public static class CombatCommandHandler
 
     private static void BasicAttack(Command command)
     {
-        if (BattleManager.IsBattleActive)
-            BattleManager.HandlePlayerAction("basic");
+        if (BattleManager.PlayerPal != null && BattleManager.PlayerPal.BasicAttackUses > 0)
+        {
+            if (BattleManager.IsBattleActive)
+            {
+                BattleManager.PlayerPal.BasicAttackUses--;
+                BattleManager.HandlePlayerAction("basic");
+            }
+            else
+            {
+                Typewriter.TypeLine("You can only use basic attacks in a battle.");
+            }
+        }
+        else if (BattleManager.PlayerPal == null)
+        {
+            Typewriter.TypeLine("No active Pal to perform basic attack!");
+        }
         else
-            Typewriter.TypeLine("You attack it in the face parts");
+        {
+            Typewriter.TypeLine("Your Pal is out of energy for basic attacks!");
+        }
     }
     
     private static void SpecialAttack(Command command)
     {
-        if (BattleManager.IsBattleActive)
-            BattleManager.HandlePlayerAction("special");
+        if (BattleManager.PlayerPal != null && BattleManager.PlayerPal.SpecialAttackUses > 0)
+        {
+            if (BattleManager.IsBattleActive)
+            {
+                BattleManager.PlayerPal.SpecialAttackUses--;
+                BattleManager.HandlePlayerAction("special");
+            }
+            else
+            {
+                Typewriter.TypeLine("You can only use special attacks in a battle.");
+            }
+        }
+        else if (BattleManager.PlayerPal == null)
+        {
+            Typewriter.TypeLine("No active Pal to perform special attack!");
+        }
         else
-            Typewriter.TypeLine("You attack it in the face parts");
+        {
+            Typewriter.TypeLine("Your Pal is out of energy for special attacks!");
+        }
     }
     
     private static void Tame(Command command)
