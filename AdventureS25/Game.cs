@@ -18,10 +18,13 @@ public static class Game
 
             if (mainMenuInput == "1")
             {
-                AudioManager.Stop(); // Stop startup audio if it was playing
+                AudioManager.Stop();
+                AudioManager.PlaySoundEffect("Input.wav");
                 validMenuChoice = true;
                 States.ChangeState(StateTypes.Exploring);
                 Console.WriteLine(Player.GetLocationDescription());
+            
+                Player.PlayNarrativeIfNeeded(Player.CurrentLocation);
                 AudioManager.PlayLooping(Player.CurrentLocation?.AudioFile); // Play starting location audio
                 bool isPlaying = true;
                 while (isPlaying)

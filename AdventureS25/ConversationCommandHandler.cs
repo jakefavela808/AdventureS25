@@ -137,7 +137,8 @@ public static class ConversationCommandHandler
                 States.ChangeState(StateTypes.Exploring);
                 return;
             }
-            Typewriter.TypeLine("Jon: Ah, shit! You're just in time, kid! I've been up all damn night coding these fuckin' Pals into existence! They're wild, they're unstable, but that's what makes 'em special! Now quit standing there like an idiot, do you want to pick your starter Pal or not?");
+            AudioManager.PlaySoundEffect("JonStarter.wav");
+            Typewriter.TypeLineWithDuration("Jon: Ah, shit! You're just in time, kid! I've been up all damn night coding these fuckin' Pals into existence! They're wild, they're unstable, but that's what makes 'em special! Now quit standing there like an idiot, do you want to pick your starter Pal or not?", 12000);
             pendingStarterChoice = "Professor Jon";
             // Print commands here for Professor Jon before awaiting choice
             Console.WriteLine(CommandList.conversationCommands);
@@ -147,9 +148,11 @@ public static class ConversationCommandHandler
         {
             if (Conditions.IsTrue(ConditionTypes.PlayerNeedsFirstHealFromNoelia))
             {
-                Typewriter.TypeLine("Noelia: Welcome to the Pal Center! I see you're in need of some healing. Let me take care of that right away!");
+                AudioManager.PlaySoundEffect("WelcomeToPalCenter.wav");
+                Typewriter.TypeLineWithDuration("Noelia: Welcome to the Pal Center! I see you're in need of some healing. Let me take care of that right away!", 5000);
                 HealAllPals(); // Automatic healing, no yes/no prompt
-                Typewriter.TypeLine("Noelia: Can you do me a favor? Take this potion to Matt in the creepy Old Cabin, I'm too scared to go there. He's been feeling under the weather and this should help him.");
+                AudioManager.PlaySoundEffect("HelpMatt.wav");
+                Typewriter.TypeLineWithDuration("Noelia: Can you do me a favor? Take this potion to Matt in the creepy Old Cabin, I'm too scared to go there. He's been feeling under the weather and this should help him.", 8000);
                 Player.AddItemToInventory("potion");
                 Conditions.ChangeCondition(ConditionTypes.PlayerNeedsFirstHealFromNoelia, false);
                 Conditions.ChangeCondition(ConditionTypes.PlayerHasPotionForMatt, true); // Player now has the potion for Matt
@@ -170,9 +173,7 @@ public static class ConversationCommandHandler
                     if (chosenPal != null)
                     {
                         chosenPal.AddExperience(noeliaXpReward);
-                        Typewriter.TypeLine($"{chosenPal.Name} gained {noeliaXpReward} XP from Nurse Noelia's help!");
                     }
-                    Typewriter.TypeLine("Now go deliver this potion to Matt, he needs it badly!");
                 }
                 else
                 {
@@ -180,22 +181,27 @@ public static class ConversationCommandHandler
                 }
                 States.ChangeState(StateTypes.Exploring); 
                 Player.Look(); 
+                AudioManager.PlaySoundEffect("DeliverPotion.wav");
+                Typewriter.TypeLineWithDuration("Noelia: Now go deliver this potion to Matt, he needs it badly!", 3000);
                 return; 
             }
             else
             {
                 if (Player.Pals.Any() && Player.Pals.Any(p => p.HP < p.MaxHP))
                 {
-                    Typewriter.TypeLine("Noelia: Welcome back! Would you like me to heal your Pals today?");
+                    AudioManager.PlaySoundEffect("WelcomeBack.wav");
+                    Typewriter.TypeLineWithDuration("Noelia: Welcome back! Would you like me to heal your Pals today?", 3000);
                     pendingStarterChoice = "Nurse Noelia";
                 }
                 else if (Player.Pals.Any())
                 {
-                    Typewriter.TypeLine("Noelia: Your Pals are already in perfect shape! If you need anything, just let me know.");
+                    AudioManager.PlaySoundEffect("PerfectShape.wav");
+                    Typewriter.TypeLineWithDuration("Noelia: Your Pals are already in perfect shape! If you need anything, just let me know.", 3000);
                 }
                 else
                 {
-                    Typewriter.TypeLine("Noelia: Oh! It looks like you don't have any Pals with you yet. Come back when you do, and I'll take good care of them!");
+                    AudioManager.PlaySoundEffect("NoPals.wav");
+                    Typewriter.TypeLineWithDuration("Noelia: Oh! It looks like you don't have any Pals with you yet. Come back when you do, and I'll take good care of them!", 6000);
                     Console.Clear();
                     States.ChangeState(StateTypes.Exploring);
                     Player.Look();
@@ -307,7 +313,8 @@ public static class ConversationCommandHandler
         Conditions.ChangeCondition(ConditionTypes.HasReceivedStarter, true);
         States.ChangeState(StateTypes.Exploring);
         Player.Look();
-        Typewriter.TypeLine("Jon: Now go fight your first wild Pal!"); 
+        AudioManager.PlaySoundEffect("FightFirstPal.wav");
+        Typewriter.TypeLine("Jon: Now go fight your first Pal!"); 
     }
 
     private static void HealAllPals()
@@ -324,6 +331,7 @@ public static class ConversationCommandHandler
 
     private static void PromptStarterSelection()
     {
+        AudioManager.PlaySoundEffect("PickAnOption.wav");
         Typewriter.TypeLine("\nPlease choose your starter pal:\n1. Sandie\n2. Clyde Capybara\n3. Gloop Glorp");
     }
 }

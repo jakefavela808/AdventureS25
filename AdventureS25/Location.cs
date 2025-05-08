@@ -22,6 +22,7 @@ public class Location
 
     private string name;
     public string Description;
+    public string Name { get { return name; } }
     
     public Dictionary<string, Location> Connections;
     public List<Item> Items = new List<Item>();

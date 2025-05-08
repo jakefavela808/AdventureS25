@@ -36,6 +36,6 @@ public static class States
         CurrentState = states[stateType];
         CurrentStateType = stateType;
         
-        Typewriter.TypeLine("Changing to state " + stateType);
+        //Typewriter.TypeLine("Changing to state " + stateType);
     }
 }

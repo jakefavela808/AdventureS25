@@ -10,6 +10,11 @@ namespace AdventureS25
 {
     public static class AudioManager
     {
+        // --- Sound Effect Management ---
+        // Track all currently playing sound effect processes/players
+        private static readonly List<Process> macSoundEffectProcesses = new List<Process>();
+        private static readonly List<SoundPlayer> windowsSoundEffectPlayers = new List<SoundPlayer>();
+
         private static SoundPlayer? currentPlayer; // For Windows
         private static Process? currentMacProcess; // For macOS afplay process
         private static CancellationTokenSource? macLoopCts; // To cancel the looping task
@@ -103,6 +108,66 @@ namespace AdventureS25
             }
         }
 
+        // Stops all currently playing sound effects, but not background music.
+        public static void StopAllSoundEffects()
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                lock (macSoundEffectProcesses)
+                {
+                    foreach (var proc in macSoundEffectProcesses.ToList())
+                    {
+                        try { if (!proc.HasExited) proc.Kill(); } catch { }
+                        try { proc.Dispose(); } catch { }
+                    }
+                    macSoundEffectProcesses.Clear();
+                }
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                lock (windowsSoundEffectPlayers)
+                {
+                    foreach (var player in windowsSoundEffectPlayers.ToList())
+                    {
+                        try { player.Stop(); } catch { }
+                        try { player.Dispose(); } catch { }
+                    }
+                    windowsSoundEffectPlayers.Clear();
+                }
+            }
+        }
+
+        // Stops only the background music (looping audio), not sound effects.
+        public static void StopMusic()
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                lock (macProcessLock)
+                {
+                    if (currentMacProcess != null && !currentMacProcess.HasExited)
+                    {
+                        try { currentMacProcess.Kill(); } catch { }
+                        try { currentMacProcess.Dispose(); } catch { }
+                        currentMacProcess = null;
+                    }
+                }
+                if (macLoopCts != null)
+                {
+                    try { macLoopCts.Cancel(); } catch { }
+                    macLoopCts = null;
+                }
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                if (currentPlayer != null)
+                {
+                    try { currentPlayer.Stop(); } catch { }
+                    try { currentPlayer.Dispose(); } catch { }
+                    currentPlayer = null;
+                }
+            }
+        }
+
         // Plays a sound looping asynchronously.
         public static void PlayLooping(string? fileName)
         {
@@ -140,7 +205,7 @@ namespace AdventureS25
 
             // Scenario 4: Not muted, fileName is valid, file exists.
             // This is the main path to play a new looping sound.
-            Stop(); // Stop any currently playing sound (critical before starting a new loop).
+            StopMusic(); // Only stop music, not sound effects.
             currentLoopingFile = fileName; // Set the new file as the current looping one.
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
@@ -238,51 +303,47 @@ namespace AdventureS25
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
-                macLoopCts?.Cancel(); // Request cancellation of the loop task
-                macLoopCts?.Dispose();
-                macLoopCts = null;
-
-                Process? processToKill = null;
                 lock (macProcessLock)
                 {
-                    if (currentMacProcess != null)
+                    if (currentMacProcess != null && !currentMacProcess.HasExited)
                     {
-                        processToKill = currentMacProcess;
-                        currentMacProcess = null; // Prevent new loops from using this instance
+                        try { currentMacProcess.Kill(); } catch { }
+                        finally { currentMacProcess.Dispose(); }
                     }
+                    currentMacProcess = null;
                 }
+                macLoopCts?.Cancel();
+                macLoopCts = null;
 
-                if (processToKill != null)
+                // Stop all sound effect processes
+                lock (macSoundEffectProcesses)
                 {
-                    try
+                    foreach (var proc in macSoundEffectProcesses)
                     {
-                        if (!processToKill.HasExited)
-                        {
-                            processToKill.Kill();
-                        }
+                        try { if (!proc.HasExited) proc.Kill(); } catch { }
+                        try { proc.Dispose(); } catch { }
                     }
-                    catch (InvalidOperationException) 
-                    {
-                        // Process may have already exited
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"Error stopping afplay process: {ex.Message}");
-                    }
-                    finally
-                    {
-                        processToKill.Dispose();
-                    }
+                    macSoundEffectProcesses.Clear();
                 }
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 currentPlayer?.Stop();
-                currentPlayer?.Dispose(); // Release resources
+                currentPlayer?.Dispose();
                 currentPlayer = null;
+
+                // Stop all sound effect players
+                lock (windowsSoundEffectPlayers)
+                {
+                    foreach (var player in windowsSoundEffectPlayers)
+                    {
+                        try { player.Stop(); } catch { }
+                        try { player.Dispose(); } catch { }
+                    }
+                    windowsSoundEffectPlayers.Clear();
+                }
             }
             // currentLoopingFile = null; // Clear the looping file when explicitly stopped, unless mute is just toggling
-            // No action needed for unsupported OS if nothing was started
         }
 
         // Helper to get the full path to the audio file in the 'Audio' directory.
@@ -291,6 +352,96 @@ namespace AdventureS25
             // Assuming 'Audio' folder is in the same directory as the executable
             string baseDirectory = AppContext.BaseDirectory; 
             return Path.Combine(baseDirectory, "Audio", fileName);
+        }
+        /// <summary>
+        /// Plays a sound effect (e.g., Input.wav) without interrupting background music.
+        /// Sound effects are loaded from the 'Audio/Sounds' subfolder.
+        /// This supports concurrent playback: on Windows, each sound effect uses a new SoundPlayer instance;
+        /// on macOS, each sound effect launches a separate afplay process.
+        /// </summary>
+        /// <param name="soundFileName">The file name of the sound effect (e.g., "Input.wav")</param>
+        public static void PlaySoundEffect(string soundFileName)
+        {
+            if (IsMuted) return;
+            if (string.IsNullOrEmpty(soundFileName)) return;
+
+            string fullPath = GetSoundEffectFullPath(soundFileName);
+            if (!File.Exists(fullPath))
+            {
+                return;
+            }
+
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                // Launch afplay in a separate process and track it
+                try
+                {
+                    var process = new Process
+                    {
+                        StartInfo = new ProcessStartInfo
+                        {
+                            FileName = "afplay",
+                            Arguments = $"\"{fullPath}\"",
+                            UseShellExecute = false,
+                            CreateNoWindow = true
+                        }
+                    };
+                    process.EnableRaisingEvents = true;
+                    process.Exited += (s, e) =>
+                    {
+                        lock (macSoundEffectProcesses)
+                        {
+                            macSoundEffectProcesses.Remove(process);
+                        }
+                        try { process.Dispose(); } catch { }
+                    };
+                    process.Start();
+                    lock (macSoundEffectProcesses)
+                    {
+                        macSoundEffectProcesses.Add(process);
+                    }
+                }
+                catch { }
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                // Play sound effect on a new SoundPlayer instance/thread and track it
+                Task.Run(() =>
+                {
+                    SoundPlayer? player = null;
+                    try
+                    {
+                        player = new SoundPlayer(fullPath);
+                        lock (windowsSoundEffectPlayers)
+                        {
+                            windowsSoundEffectPlayers.Add(player);
+                        }
+                        player.PlaySync();
+                    }
+                    catch { }
+                    finally
+                    {
+                        if (player != null)
+                        {
+                            lock (windowsSoundEffectPlayers)
+                            {
+                                windowsSoundEffectPlayers.Remove(player);
+                            }
+                            try { player.Dispose(); } catch { }
+                        }
+                    }
+                });
+            }
+            // else: unsupported OS, do nothing
+        }
+
+        /// <summary>
+        /// Gets the full path to a sound effect file in the 'Audio' directory.
+        /// </summary>
+        private static string GetSoundEffectFullPath(string soundFileName)
+        {
+            string baseDirectory = AppContext.BaseDirectory;
+            return Path.Combine(baseDirectory, "Audio", soundFileName);
         }
     }
 }

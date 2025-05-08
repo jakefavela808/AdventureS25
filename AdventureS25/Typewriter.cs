@@ -38,6 +38,49 @@ namespace AdventureS25
             Console.WriteLine();
         }
 
+        /// <summary>
+        /// Prints the text typewriter-style, automatically adjusting the per-character delay so the total time is as close as possible to milliseconds.
+        /// Ignores punctuation delays and uses a flat delay for all characters.
+        /// </summary>
+        public static void TypeLineWithDuration(string text, int milliseconds)
+        {
+            skipRequested = false;
+            int charCount = text.Replace("\n", "").Length;
+            if (charCount == 0) { Console.WriteLine(); return; }
+            int perCharDelay = milliseconds / charCount;
+            var printTask = Task.Run(() => PrintWithTypewriterFixedDelay(text, perCharDelay));
+            while (!printTask.IsCompleted)
+            {
+                if (Console.KeyAvailable)
+                {
+                    var key = Console.ReadKey(true);
+                    if (key.Key == ConsoleKey.Enter)
+                    {
+                        skipRequested = true;
+                    }
+                }
+                Thread.Sleep(10);
+            }
+            Console.WriteLine();
+        }
+
+        private static void PrintWithTypewriterFixedDelay(string text, int delay)
+        {
+            int i = 0;
+            while (i < text.Length)
+            {
+                if (skipRequested)
+                {
+                    Console.Write(text.Substring(i));
+                    return;
+                }
+                char c = text[i];
+                Console.Write(c);
+                if (c != '\n') Task.Delay(delay).Wait();
+                i++;
+            }
+        }
+
         private static void PrintWithTypewriter(string text)
         {
             int i = 0;

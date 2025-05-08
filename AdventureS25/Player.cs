@@ -38,7 +38,6 @@ public static class Player
         }
         if (CurrentLocation.CanMoveInDirection(command))
         {
-            AudioManager.Stop(); // Stop current location's audio
             Location? newLocation = CurrentLocation.GetLocationInDirection(command);
             if (newLocation == null)
             {
@@ -51,7 +50,10 @@ public static class Player
             CurrentLocation = newLocation;
             Console.Clear();
             Console.WriteLine(CurrentLocation.GetDescription());
+
+            PlayNarrativeIfNeeded(CurrentLocation);
             AudioManager.PlayLooping(CurrentLocation.AudioFile); // Play new location's audio
+
         }
         else
         {
@@ -286,14 +288,45 @@ public static class Player
         if (loc != null)
         {
             CurrentLocation = loc;
-            AudioManager.Stop(); // Stop current location's audio
+            PlayNarrativeIfNeeded(CurrentLocation);
             AudioManager.PlayLooping(CurrentLocation.AudioFile); // Play new location's audio
             Look();
+            AudioManager.Stop();
         }
         else
         {
             Typewriter.TypeLine($"Error: Location '{locationName}' not found. Cannot move.");
             Look();
+        }
+    }
+
+    // Helper to play narrative sound effect for key locations
+    public static void PlayNarrativeIfNeeded(Location? location)
+    {
+        if (location == null) return;
+        switch (location.Name)
+        {
+            case "Orange Town":
+                AudioManager.PlaySoundEffect("OrangeTownNarrative.wav");
+                break;
+            case "Viridian City":
+                AudioManager.PlaySoundEffect("CityNarrative.wav");
+                break;
+            case "Route 1":
+                AudioManager.PlaySoundEffect("RouteOneNarrative.wav");
+                break;
+            case "Log Cabin":
+                AudioManager.PlaySoundEffect("LogCabinNarrative.wav");
+                break;
+            case "Pal Center":
+                AudioManager.PlaySoundEffect("PalCenterNarrative.wav");
+                break;
+            case "Cave":
+                AudioManager.PlaySoundEffect("CaveNarrative.wav");
+                break;
+            case "Professor Jon's Lab":
+                AudioManager.PlaySoundEffect("JonsLabNarrative.wav");
+                break;
         }
     }
 
@@ -303,7 +336,8 @@ public static class Player
         if (noteItem != null && Inventory.Contains(noteItem)) { 
             Console.Clear();
             Look();
-            Typewriter.TypeLine("Dear Adventurer,\n\nListen up fucker! I heard you're trying to become some kind of Pal Tamer or whatever. GOOD NEWS! I'm gonna help you not completely suck at it! I've been studying this AMAZING new Pal specimen that's perfect for beginners.\n\nGet your ass over to my Fusion Lab ASAP!!! Don't make me come find you, because I WILL, and you WON'T like it! This is important COMPUTER SCIENCE happening here!\n\nSincerely, \nProf. Jon (the smartest Computer Scientist in this dimension)");
+            AudioManager.PlaySoundEffect("ReadingNote.wav");
+            Typewriter.TypeLineWithDuration("Dear Adventurer,\n\nListen up fucker! I heard you're trying to become some kind of Pal Tamer or whatever. GOOD NEWS! I'm gonna help you not completely suck at it! I've been studying this AMAZING new Pal specimen that's perfect for beginners.\n\nGet your ass over to my Fusion Lab ASAP!!! Don't make me come find you, because I WILL, and you WON'T like it! This is important COMPUTER SCIENCE happening here!\n\nSincerely, \nProf. Jon (the smartest Computer Scientist in this dimension)", 26000);
             Inventory.Remove(noteItem);
             Conditions.ChangeCondition(ConditionTypes.HasReadNote, true);
             Console.Clear();

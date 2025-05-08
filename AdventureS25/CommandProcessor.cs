@@ -61,6 +61,10 @@ public static class CommandProcessor
                 Console.Write(keyInfo.KeyChar);
             }
         }
+        // Stop all sound effects after input is submitted
+        AudioManager.StopAllSoundEffects();
+        // Play input sound effect after the player has entered input
+        AudioManager.PlaySoundEffect("Input.wav");
         return input;
     }
 }

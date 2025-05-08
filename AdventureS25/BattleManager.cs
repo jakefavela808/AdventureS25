@@ -116,9 +116,9 @@ public static class BattleManager
                 break;
             case "defend":
                 // playerDefending = true;
+                Console.WriteLine("");
                 int heal = 5;
                 playerPal.HP = Math.Min(playerPal.MaxHP, playerPal.HP + heal);
-                Console.WriteLine("");
                 Typewriter.TypeLine($"{playerPal.Name} braces for the next attack and heals for {heal} HP!");
                 break;
             case "potion":
@@ -153,11 +153,12 @@ public static class BattleManager
                 }
                 else
                 {
-                    Typewriter.TypeLine("You failed to run away!\n");
+                    Typewriter.TypeLine("You failed to run away!");
                     // Enemy gets a turn if run fails, then we proceed to normal turn flow
                 }
                 break;
         }
+
         if (wildPal != null && wildPal.HP > 0 && isBattleActive) // Check isBattleActive again in case run succeeded and changed it
             EnemyTurn();
         CheckBattleEnd();
@@ -245,6 +246,7 @@ public static class BattleManager
 
         if (action == 2) 
         {
+            Console.WriteLine("");
             int heal = 5;
             wildPal.HP = Math.Min(wildPal.MaxHP, wildPal.HP + heal);
             Typewriter.TypeLine($"{wildPal.Name} braces for the next attack and heals for {heal} HP!");
@@ -329,19 +331,19 @@ public static class BattleManager
                 Typewriter.TypeLine($"{playerPal.Name} fainted! Choose another Pal to continue the fight.");
                 playerPal = availablePals[0]; // Auto-select for now; could prompt user for choice
                 if (playerPal != null)
-{
-    Typewriter.TypeLine($"{playerPal.Name} enters the battle!");
-}
-else
-{
-    Typewriter.TypeLine("No Pal was selected to enter the battle!");
-    EndBattle();
-    States.ChangeState(StateTypes.Exploring);
-    Player.Look();
-    AudioManager.Stop();
-    AudioManager.PlayLooping(previousLocationAudio);
-    return;
-}
+                {
+                    Typewriter.TypeLine($"{playerPal.Name} enters the battle!");
+                }
+                else
+                {
+                    Typewriter.TypeLine("No Pal was selected to enter the battle!");
+                }
+                EndBattle();
+                States.ChangeState(StateTypes.Exploring);
+                Player.Look();
+                AudioManager.Stop();
+                AudioManager.PlayLooping(previousLocationAudio);
+                return;
             }
             else
             {
@@ -361,7 +363,8 @@ else
         {
             Conditions.ChangeCondition(ConditionTypes.HasDefeatedFirstPal, true);
             Conditions.ChangeCondition(ConditionTypes.PlayerNeedsFirstHealFromNoelia, true); // Set Noelia's trigger
-            Typewriter.TypeLine("\nYour Pal looks tired! Go heal it at the Pal Center in town.");
+            AudioManager.PlaySoundEffect("GoHeal.wav");
+            Typewriter.TypeLineWithDuration("\nGreat job on your first battle! Your Pal looks tired, go heal it at the Pal Center.", 7000);
         }
     }
 
@@ -400,15 +403,15 @@ else
         {
             Typewriter.TypeLine("Player Pal: Fainted or Missing");
         }
+        Console.WriteLine("");
         if (wildPal != null)
         {
-            Console.WriteLine("");
             Typewriter.TypeLine($"{wildPal.Name} HP: {wildPal.HP}/{wildPal.MaxHP} | Basic Energy: {wildPal.BasicAttackUses}/{wildPal.MaxBasicAttackUses} | Special Energy: {wildPal.SpecialAttackUses}/{wildPal.MaxSpecialAttackUses}");
         }
         else
         {
             Typewriter.TypeLine("Wild Pal: Fainted or Missing");
         }
-        Console.WriteLine(""); // Add this line for an extra blank line after status
+        Console.WriteLine("");
     }
 }
