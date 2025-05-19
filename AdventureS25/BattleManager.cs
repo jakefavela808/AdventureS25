@@ -48,11 +48,7 @@ public static class BattleManager
             wildPal.BasicAttackUses = wildPal.MaxBasicAttackUses; // Reset wild Pal's basic attack uses
             wildPal.SpecialAttackUses = wildPal.MaxSpecialAttackUses; // Reset wild Pal's special attack uses
         }
-        if (playerPal != null)
-        {
-            Typewriter.TypeLine($"You send out {playerPal.Name}!");
-        }
-        else
+        if (playerPal == null)
         {
             Typewriter.TypeLine("No Pal was selected to send out!");
             isBattleActive = false;
@@ -119,6 +115,7 @@ public static class BattleManager
                 Console.WriteLine("");
                 int heal = 5;
                 playerPal.HP = Math.Min(playerPal.MaxHP, playerPal.HP + heal);
+                AudioManager.PlaySoundEffect("Heal Sound Effect.wav");
                 Typewriter.TypeLine($"{playerPal.Name} braces for the next attack and heals for {heal} HP!");
                 break;
             case "potion":
@@ -181,10 +178,13 @@ public static class BattleManager
         defender.HP -= damage;
         if (halveDamage)
         {
+            AudioManager.PlaySoundEffect("Heal Sound Effect.wav");
             Typewriter.TypeLine($"{attacker.Name} used {move}! {defender.Name} braced and took only {damage} damage.");
         }
         else
         {
+
+            AudioManager.PlaySoundEffect("BasicAttack.wav");
             Typewriter.TypeLine($"{attacker.Name} used {move}! {defender.Name} took {damage} damage.");
         }
     }
@@ -193,6 +193,7 @@ public static class BattleManager
     {
         int heal = 15;
         pal.HP = Math.Min(pal.MaxHP, pal.HP + heal);
+        AudioManager.PlaySoundEffect("Heal Sound Effect.wav");
         Typewriter.TypeLine($"{pal.Name} healed for {heal} HP!");
     }
 
@@ -249,6 +250,7 @@ public static class BattleManager
             Console.WriteLine("");
             int heal = 5;
             wildPal.HP = Math.Min(wildPal.MaxHP, wildPal.HP + heal);
+            AudioManager.PlaySoundEffect("Heal Sound Effect.wav");
             Typewriter.TypeLine($"{wildPal.Name} braces for the next attack and heals for {heal} HP!");
             enemyDefending = true;
         }
@@ -382,7 +384,6 @@ public static class BattleManager
             {
                 int xpGained = 50;
                 playerPal.AddExperience(xpGained);
-                Typewriter.TypeLine($"{playerPal.Name} gained {xpGained} XP for defeating {wildPal.Name}!");
             }
         }
 

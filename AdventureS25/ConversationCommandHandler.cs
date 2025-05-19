@@ -154,6 +154,7 @@ public static class ConversationCommandHandler
                 AudioManager.PlaySoundEffect("HelpMatt.wav");
                 Typewriter.TypeLineWithDuration("Noelia: Can you do me a favor? Take this potion to Matt in the creepy Old Cabin, I'm too scared to go there. He's been feeling under the weather and this should help him.", 8000);
                 Player.AddItemToInventory("potion");
+                Typewriter.TypeLine($"A potion has been added to your inventory.");
                 Conditions.ChangeCondition(ConditionTypes.PlayerNeedsFirstHealFromNoelia, false);
                 Conditions.ChangeCondition(ConditionTypes.PlayerHasPotionForMatt, true); // Player now has the potion for Matt
 
@@ -216,18 +217,21 @@ public static class ConversationCommandHandler
             {
                 if (Player.HasItem("potion"))
                 {
-                    Typewriter.TypeLine("Matt: *cough* Is that... a potion? From Noelia? Oh, thank goodness! I was starting to think I'd be stuck like this forever.");
+                    AudioManager.PlaySoundEffect("PotionDelivered.wav");
+                    Typewriter.TypeLineWithDuration("Matt: Is that... a potion? From Noelia? Oh, thank goodness! I was starting to think I'd be stuck like this forever.", 7000);
                     Player.RemoveItemFromInventory("potion");
                     Conditions.ChangeCondition(ConditionTypes.PlayerHasPotionForMatt, false); // Quest to deliver potion completed
-                    Typewriter.TypeLine("Matt: Thanks, friend. I owe you one. Say... I know a secret. There's an old chest hidden in a cave not too far from here. Might be something good in it for ya. Just head east from my cabin, can't miss it.");
+                    AudioManager.PlaySoundEffect("TakeThisKey.wav");
+                    Typewriter.TypeLineWithDuration("Matt: Thanks, friend. I owe you one. Say... I know a secret. There's an old chest hidden in a cave not too far from here. Just head east from my cabin and take this key.", 10000);
                     Conditions.ChangeCondition(ConditionTypes.MattHasRevealedCave, true);
+                    Player.AddItemToInventory("key");
+                    Typewriter.TypeLine($"A key has been added to your inventory.");
 
                     // Award XP for delivering the potion to Matt
                     int mattXpReward = 75;
                     if (Player.Pals.Any())
                     {
                         Player.Pals[0].AddExperience(mattXpReward);
-                        Typewriter.TypeLine($"(Your team gained {mattXpReward} XP for helping Matt!)");
                     }
                     else
                     {
@@ -308,13 +312,16 @@ public static class ConversationCommandHandler
         if (!string.IsNullOrEmpty(art))
             Console.WriteLine(art);
         Typewriter.TypeLine($"You chose {pal.Name} as your starter Pal!");
+        AudioManager.PlaySoundEffect("AmazingPick.wav");
+        Typewriter.TypeLineWithDuration("Jon: Thats an amazing pick! Dont fuckin' abuse it or whatever take care of the little creature.", 4200);
         awaitingStarterSelection = false;
         pendingStarterChoice = null;
         Conditions.ChangeCondition(ConditionTypes.HasReceivedStarter, true);
         States.ChangeState(StateTypes.Exploring);
         Player.Look();
         AudioManager.PlaySoundEffect("FightFirstPal.wav");
-        Typewriter.TypeLine("Jon: Now go fight your first Pal!"); 
+        Typewriter.TypeLineWithDuration("Jon: Now go fight your first Pal!", 1500);
+         
     }
 
     private static void HealAllPals()
@@ -332,6 +339,6 @@ public static class ConversationCommandHandler
     private static void PromptStarterSelection()
     {
         AudioManager.PlaySoundEffect("PickAnOption.wav");
-        Typewriter.TypeLine("\nPlease choose your starter pal:\n1. Sandie\n2. Clyde Capybara\n3. Gloop Glorp");
+        Typewriter.TypeLineWithDuration("\nPlease choose your starter pal:\n1. Sandie\n2. Clyde Capybara\n3. Gloop Glorp", 5000);
     }
 }

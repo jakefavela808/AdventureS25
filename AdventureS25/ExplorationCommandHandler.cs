@@ -256,8 +256,7 @@ public static class ExplorationCommandHandler
                 {
                     if (Player.Pals.Any()) // Check if the player has any Pals
                     {
-                        Player.Pals[0].AddExperience(gainedXp); // Give XP to the first Pal
-                        // lootMessage += $"\n- {Player.Pals[0].Name} gained {gainedXp} XP"; // Redundant with Pal.AddExperience message
+                        lootMessage += $"\n- {Player.Pals[0].Name} gained {gainedXp} XP";
                     }
                     else
                     {
@@ -267,6 +266,11 @@ public static class ExplorationCommandHandler
             }
             Typewriter.TypeLine("Opening chest...");
             ChestAnimation();
+            // Grant XP after animation and before loot message
+            if (gainedXp > 0 && Player.Pals.Any())
+            {
+                Player.Pals[0].AddExperience(gainedXp, suppressMessage: true);
+            }
             Typewriter.TypeLine($"{lootMessage}");
         }
         else

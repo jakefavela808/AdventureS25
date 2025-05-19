@@ -33,6 +33,7 @@ public static class CombatCommandHandler
             return;
         }
         var playerPal = Player.Pals[0];
+        AudioManager.PlaySoundEffect("BattleStart.wav");
         BattleManager.StartBattle(playerPal, wildPal);
         States.ChangeState(StateTypes.Fighting);
         // Print full battle UI/UX

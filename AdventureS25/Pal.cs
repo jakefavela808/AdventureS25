@@ -47,12 +47,15 @@ public class Pal
         SpecialAttackUses = MaxSpecialAttackUses;
     }
 
-    public void AddExperience(int amount)
+    public void AddExperience(int amount, bool suppressMessage = false)
     {
         if (amount <= 0) return;
 
         ExperiencePoints += amount;
-        Typewriter.TypeLine($"{Name} gained {amount} XP!");
+        if (!suppressMessage)
+        {
+            Typewriter.TypeLine($"{Name} gained {amount} XP!");
+        }
 
         while (ExperiencePoints >= ExperienceToNextLevel)
         {
