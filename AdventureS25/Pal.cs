@@ -7,10 +7,10 @@ public class Pal
 {
     public string Name { get; set; }
     public string Description { get; set; }
-    public string InitialDescription { get; set; }
+    public string? InitialDescription { get; set; }
     public bool IsAcquirable { get; set; }
-    public string AsciiArt { get; set; }
-    public string Location { get; set; }
+    public string? AsciiArt { get; set; }
+    public string? Location { get; set; }
     public List<string> Moves { get; set; }
 
     public int HP { get; set; }
@@ -25,7 +25,10 @@ public class Pal
     public int MaxSpecialAttackUses { get; set; }
     public int SpecialAttackUses { get; set; }
 
-    public Pal(string name, string description, string initialDescription, bool isAcquirable, string asciiArt, string location, List<string> moves, int maxHP = 50)
+    public int BaseAttackDamage { get; set; }
+    public int BaseSpecialAttackDamage { get; set; }
+
+    public Pal(string name, string description, string? initialDescription, bool isAcquirable, string? asciiArt, string? location, List<string> moves, int maxHP = 50)
     {
         Name = name;
         Description = description;
@@ -45,6 +48,10 @@ public class Pal
         BasicAttackUses = MaxBasicAttackUses;
         MaxSpecialAttackUses = 5;  // Default max special attack uses
         SpecialAttackUses = MaxSpecialAttackUses;
+
+        // Base damage stats
+        BaseAttackDamage = 10; // Default base attack damage
+        BaseSpecialAttackDamage = 15; // Default base special attack damage
     }
 
     public void AddExperience(int amount, bool suppressMessage = false)
@@ -72,7 +79,13 @@ public class Pal
         int hpIncrease = 10; // Example: Increase MaxHP by 10 each level
         MaxHP += hpIncrease;
         HP = MaxHP; // Heal to new max HP
-        Typewriter.TypeLine($"{Name}'s Max HP increased by {hpIncrease}!");
+
+        // Increase damage stats
+        int attackIncrease = 2;
+        BaseAttackDamage += attackIncrease;
+
+        int specialAttackIncrease = 3;
+        BaseSpecialAttackDamage += specialAttackIncrease;
 
         ExperiencePoints -= ExperienceToNextLevel; // Subtract XP used for this level
         ExperienceToNextLevel = Level * 100; // Example: Next level requires Level * 100 XP
@@ -85,5 +98,13 @@ public class Pal
     public string GetLocationDescription()
     {
         return $"{AsciiArt}\n{InitialDescription}";
+    }
+
+    public Pal Clone()
+    {
+        // MemberwiseClone performs a shallow copy. If Pal contains complex reference types
+        // that should be unique per instance (e.g., a list of status effects that can change),
+        // a more detailed deep copy would be needed for those members.
+        return (Pal)this.MemberwiseClone();
     }
 }

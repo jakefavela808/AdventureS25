@@ -15,50 +15,37 @@ public static class CombatCommandHandler
 
     public static void Fight(Command command)
     {
-        // Get the wild pal at the current location
-        var wildPal = Player.CurrentLocation?.pals != null && Player.CurrentLocation.pals.Count > 0 ? Player.CurrentLocation.pals[0] : null;
+        // Check if there's an active wild Pal in the current location
+        Pal? wildPal = Player.CurrentLocation?.ActiveWildPal;
+
         if (wildPal == null)
         {
-            Typewriter.TypeLine("There is no wild Pal here to fight!");
+            Typewriter.TypeLine("There's no wild Pal here to fight.");
             Console.Clear();
             Player.Look();
             return;
         }
-        // Use the first Pal in the player's inventory for battle
-        if (Player.Pals == null || Player.Pals.Count == 0)
+
+        // If the player has no Pals, they can't fight.
+        if (!Player.Pals.Any())
         {
-            Typewriter.TypeLine("You don't have a Pal to fight with!");
-            Console.Clear();
-            Player.Look();
+            Typewriter.TypeLine("You have no Pals to fight with!");
             return;
         }
-        var playerPal = Player.Pals[0];
-        AudioManager.PlaySoundEffect("BattleStart.wav");
-        BattleManager.StartBattle(playerPal, wildPal);
-        States.ChangeState(StateTypes.Fighting);
-        // Print full battle UI/UX
-        Console.WriteLine("================ BATTLE START ================");
-        Console.WriteLine(GetAsciiArt(playerPal.AsciiArt));
-        Typewriter.TypeLine($"{playerPal.Description}");
-        Typewriter.TypeLine($"HP: {playerPal.HP}/{playerPal.MaxHP}");
-        if (playerPal.Moves != null && playerPal.Moves.Count > 0)
-        {
-            string basicMoveDisplay = playerPal.Moves.Count > 0 ? $"{playerPal.Moves[0]} ({playerPal.BasicAttackUses}/{playerPal.MaxBasicAttackUses})" : "N/A";
-            string specialMoveDisplay = playerPal.Moves.Count > 1 ? $"{playerPal.Moves[1]} ({playerPal.SpecialAttackUses}/{playerPal.MaxSpecialAttackUses})" : "N/A";
-            Typewriter.TypeLine($"Moves: {basicMoveDisplay}, {specialMoveDisplay}");
-        }
-        Typewriter.TypeLine("");
+
+        // Player has Pals, proceed to battle setup
         Typewriter.TypeLine($"A wild {wildPal.Name} appears!");
-        Console.WriteLine(GetAsciiArt(wildPal.AsciiArt));
-        Typewriter.TypeLine($"{wildPal.Description}");
-        Typewriter.TypeLine($"HP: {wildPal.HP}/{wildPal.MaxHP}");
-        if (wildPal.Moves != null && wildPal.Moves.Count > 0)
-        {
-            string basicMoveDisplay = wildPal.Moves.Count > 0 ? $"{wildPal.Moves[0]} ({wildPal.BasicAttackUses}/{wildPal.MaxBasicAttackUses})" : "N/A";
-            string specialMoveDisplay = wildPal.Moves.Count > 1 ? $"{wildPal.Moves[1]} ({wildPal.SpecialAttackUses}/{wildPal.MaxSpecialAttackUses})" : "N/A";
-            Typewriter.TypeLine($"Moves: {basicMoveDisplay}, {specialMoveDisplay}");
-        }
-        Console.WriteLine(CommandList.combatCommands);
+        // SoundManager.PlaySound("Sounds/battle_start.wav"); // Battle start sound
+
+        // Start battle with the active wild Pal
+        // The BattleManager.StartBattle will handle Pal selection if playerPal is null.
+        BattleManager.StartBattle(null, wildPal);
+
+        // State change is now handled by BattleManager.StartBattle if successful.
+        // if (BattleManager.IsBattleActive) // Check if battle actually started
+        // {
+        //     States.ChangeState(StateTypes.Fighting);
+        // }
     }
     
     public static void Handle(Command command)
@@ -154,7 +141,7 @@ public static class CombatCommandHandler
     }
 
     // Helper method to resolve AsciiArt keys to actual art
-    private static string GetAsciiArt(string artKey)
+    public static string GetAsciiArt(string artKey)
     {
         if (string.IsNullOrEmpty(artKey)) return "";
         if (!artKey.StartsWith("AsciiArt.")) return artKey;

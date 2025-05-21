@@ -23,6 +23,14 @@
       "IsInteractable": true,
       "Location": "Pal Center",
       "AsciiArt": "AsciiArt.nurseCharacter"
+    },
+    {
+      "Name": "Trainer Saul",
+      "Description": "A creepy trainer with ghost-type Pals.",
+      "InitialDescription": "A trainer stands here, ready to challenge you to a battle.",
+      "IsInteractable": true,
+      "Location": "Dark Cave Passage",
+      "AsciiArt": "AsciiArt.saulCharacter"
     }
   ]
 }

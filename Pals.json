@@ -53,6 +53,24 @@
       "Location": "Route 1",
       "AsciiArt": "AsciiArt.mortyPal",
       "Moves": ["Freak Out", "Meltdown"]
+    },
+    {
+      "Name": "Lostling",
+      "Description": "A ghost-type Pal that wanders aimlessly. It's always looking for its way back home.",
+      "InitialDescription": "A lostling is here, wandering aimlessly.",
+      "IsAcquirable": true,
+      "Location": "Cave",
+      "AsciiArt": "AsciiArt.lostlingPal",
+      "Moves": ["Deep Stare", "Bite"]
+    },
+    {
+      "Name": "Smiley",
+      "Description": "A ghost-type Pal with a big smiley face. Smiley is always happy!",
+      "InitialDescription": "A wild Smiley is here, grinning with a big smiley face!",
+      "IsAcquirable": true,
+      "Location": "Cave",
+      "AsciiArt": "AsciiArt.smileyPal",
+      "Moves": ["Smile", "Ghostly Whisper"]
     }
   ]
 }

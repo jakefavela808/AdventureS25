@@ -214,6 +214,9 @@ public static class ExplorationCommandHandler
         // If the noun is missing or not 'chest', do nothing (let the parser/validator/game handle it).
         if (string.IsNullOrWhiteSpace(command.Noun) || command.Noun.ToLower() != "chest")
         {
+            // It's good practice to provide feedback if the command is 'open' but the noun is wrong.
+            // However, if the design is to silently ignore 'open anything_else', then return is fine.
+            // For now, let's assume the current behavior of returning for 'open something_else' is intended.
             return;
         }
 
@@ -222,56 +225,79 @@ public static class ExplorationCommandHandler
 
         if (chestItem != null)
         {
-            // For simplicity, we remove the chest. 
-            // A more complex system might mark it as 'opened'.
-            Player.CurrentLocation?.RemoveItem(chestItem); // Avoid null dereference
+            if (Player.HasItem("key"))
+            {
+                Player.RemoveItemFromInventory("key"); // Use the key
+                AudioManager.PlaySoundEffect("ChestOpening.wav");
+                Typewriter.TypeLine("You use a key to unlock the chest...");
 
-            int numPotions = random.Next(0, 3); // 0, 1, or 2 potions
-            int numTreats = random.Next(0, 4);  // 0, 1, 2, or 3 treats
-            int gainedXp = random.Next(25, 76); // 25 to 75 XP
-            string lootMessage = "You find: ";
-            if (numPotions == 0 && numTreats == 0 && gainedXp == 0)
-            {
-                lootMessage += "\nIt's empty!";
-            }
-            else
-            {
-                if (numPotions > 0)
+
+                // For simplicity, we remove the chest. 
+                // A more complex system might mark it as 'opened'.
+                Player.CurrentLocation?.RemoveItem(chestItem); // Avoid null dereference
+
+                int numPotions = random.Next(0, 3); // 0, 1, or 2 potions
+                int numTreats = random.Next(0, 4);  // 0, 1, 2, or 3 treats
+                int gainedXp = random.Next(25, 76); // 25 to 75 XP
+                string lootMessage = "You find: ";
+                Pal? palToReceiveXp = null; // Declare here and make nullable
+
+                if (numPotions == 0 && numTreats == 0 && gainedXp == 0)
                 {
-                    for (int i = 0; i < numPotions; i++)
-                    {
-                        Player.AddItemToInventory("potion");
-                    }
-                    lootMessage += $"\n- {numPotions} potion(s)";
+                    lootMessage += "\nIt's empty!";
                 }
-                if (numTreats > 0)
+                else
                 {
-                    for (int i = 0; i < numTreats; i++)
+                    if (numPotions > 0)
                     {
-                        Player.AddItemToInventory("treat");
+                        for (int i = 0; i < numPotions; i++)
+                        {
+                            Player.AddItemToInventory("potion");
+                        }
+                        lootMessage += $"\n- {numPotions} potion(s)";
                     }
-                    lootMessage += $"\n- {numTreats} treat(s)";
-                }
-                if (gainedXp > 0)
-                {
-                    if (Player.Pals.Any()) // Check if the player has any Pals
+                    if (numTreats > 0)
                     {
-                        lootMessage += $"\n- {Player.Pals[0].Name} gained {gainedXp} XP";
+                        for (int i = 0; i < numTreats; i++)
+                        {
+                            Player.AddItemToInventory("treat");
+                        }
+                        lootMessage += $"\n- {numTreats} treat(s)";
                     }
-                    else
+                    if (gainedXp > 0 && Player.Pals.Any())
+                    {
+                        if (Player.Pals.Count > 1)
+                        {
+                            int randomIndex = random.Next(0, Player.Pals.Count);
+                            palToReceiveXp = Player.Pals[randomIndex];
+                        }
+                        else
+                        {
+                            palToReceiveXp = Player.Pals[0];
+                        }
+                        lootMessage += $"\n- {palToReceiveXp.Name} gained {gainedXp} XP";
+                    }
+                    else if (gainedXp > 0) // Player has no pals but XP was rolled
                     {
                         lootMessage += $"\n- {gainedXp} XP (You have no Pals to gain this XP!)";
                     }
                 }
+                //Typewriter.TypeLine("Opening chest...");
+                ChestAnimation();
+                AudioManager.PlaySoundEffect("Loot.wav");
+                // Grant XP after animation and before loot message
+                if (palToReceiveXp != null && gainedXp > 0) // Check palToReceiveXp is not null
+                {
+                    palToReceiveXp.AddExperience(gainedXp, suppressMessage: true);
+                }
+                Typewriter.TypeLine($"{lootMessage}");
             }
-            Typewriter.TypeLine("Opening chest...");
-            ChestAnimation();
-            // Grant XP after animation and before loot message
-            if (gainedXp > 0 && Player.Pals.Any())
+            else
             {
-                Player.Pals[0].AddExperience(gainedXp, suppressMessage: true);
+                Typewriter.TypeLine("The chest is locked. You need a key to open it.");
+                Console.Clear(); // Optional: clear screen after message
+                Player.Look();   // Optional: show current location info
             }
-            Typewriter.TypeLine($"{lootMessage}");
         }
         else
         {

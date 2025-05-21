@@ -38,7 +38,7 @@ public static class Pals
 
             var location = Map.GetLocationByName(pal.Location);
             if (location != null)
-                location.AddPal(pal);
+                location.PotentialPalNames.Add(pal.Name);
             else
             {
                 Console.WriteLine($"[WARNING] Location '{pal.Location}' for Pal '{pal.Name}' not found.");

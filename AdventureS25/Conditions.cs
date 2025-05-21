@@ -67,6 +67,10 @@ public static class Conditions
         isDisconnectedRooms.AddToActivateList(ConditionActions.RemoveMapConnection("Entrance", "north"));
         isDisconnectedRooms.AddToActivateList(ConditionActions.RemoveMapConnection("Throne Room", "south"));
         Add(isDisconnectedRooms);
+
+        // Register DefeatedTrainerSaul
+        Condition defeatedTrainerSaul = new Condition(ConditionTypes.DefeatedTrainerSaul);
+        Add(defeatedTrainerSaul);
     }   
     
     public static void ChangeCondition(ConditionTypes conditionType,

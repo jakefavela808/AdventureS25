@@ -1,7 +1,6 @@
 namespace AdventureS25;
 
 using AdventureS25;
-
 public static class ConversationCommandHandler
 {
     private static Dictionary<string, Action<Command>> commandMap =
@@ -133,10 +132,13 @@ public static class ConversationCommandHandler
         {
             if (Conditions.IsTrue(ConditionTypes.HasReceivedStarter))
             {
-                Typewriter.TypeLine("Professor Jon is busy right now and doesn't have anything else for you.");
+                AudioManager.StopAllSoundEffects();
+                AudioManager.PlaySoundEffect("JonBusy.wav");
+                Typewriter.TypeLineWithDuration("Jon: Hey kid, good to see ya! I'm swamped with some new Pal data right now, catch ya later!", 4000);
                 States.ChangeState(StateTypes.Exploring);
                 return;
             }
+            AudioManager.StopAllSoundEffects();
             AudioManager.PlaySoundEffect("JonStarter.wav");
             Typewriter.TypeLineWithDuration("Jon: Ah, shit! You're just in time, kid! I've been up all damn night coding these fuckin' Pals into existence! They're wild, they're unstable, but that's what makes 'em special! Now quit standing there like an idiot, do you want to pick your starter Pal or not?", 12000);
             pendingStarterChoice = "Professor Jon";
@@ -148,9 +150,11 @@ public static class ConversationCommandHandler
         {
             if (Conditions.IsTrue(ConditionTypes.PlayerNeedsFirstHealFromNoelia))
             {
+                AudioManager.StopAllSoundEffects();
                 AudioManager.PlaySoundEffect("WelcomeToPalCenter.wav");
                 Typewriter.TypeLineWithDuration("Noelia: Welcome to the Pal Center! I see you're in need of some healing. Let me take care of that right away!", 5000);
                 HealAllPals(); // Automatic healing, no yes/no prompt
+                AudioManager.StopAllSoundEffects();
                 AudioManager.PlaySoundEffect("HelpMatt.wav");
                 Typewriter.TypeLineWithDuration("Noelia: Can you do me a favor? Take this potion to Matt in the creepy Old Cabin, I'm too scared to go there. He's been feeling under the weather and this should help him.", 8000);
                 Player.AddItemToInventory("potion");
@@ -182,6 +186,7 @@ public static class ConversationCommandHandler
                 }
                 States.ChangeState(StateTypes.Exploring); 
                 Player.Look(); 
+                AudioManager.StopAllSoundEffects();
                 AudioManager.PlaySoundEffect("DeliverPotion.wav");
                 Typewriter.TypeLineWithDuration("Noelia: Now go deliver this potion to Matt, he needs it badly!", 3000);
                 return; 
@@ -190,23 +195,30 @@ public static class ConversationCommandHandler
             {
                 if (Player.Pals.Any() && Player.Pals.Any(p => p.HP < p.MaxHP))
                 {
+                    AudioManager.StopAllSoundEffects();
                     AudioManager.PlaySoundEffect("WelcomeBack.wav");
                     Typewriter.TypeLineWithDuration("Noelia: Welcome back! Would you like me to heal your Pals today?", 3000);
                     pendingStarterChoice = "Nurse Noelia";
+                    // Print commands here for Nurse Noelia before awaiting choice
+                    Console.WriteLine(CommandList.conversationCommands); 
                 }
                 else if (Player.Pals.Any())
                 {
+                    AudioManager.StopAllSoundEffects();
                     AudioManager.PlaySoundEffect("PerfectShape.wav");
                     Typewriter.TypeLineWithDuration("Noelia: Your Pals are already in perfect shape! If you need anything, just let me know.", 3000);
+                    Console.WriteLine(CommandList.conversationCommands);
+                    States.ChangeState(StateTypes.Exploring);
+                    Player.Look();
                 }
                 else
                 {
+                    AudioManager.StopAllSoundEffects();
                     AudioManager.PlaySoundEffect("NoPals.wav");
-                    Typewriter.TypeLineWithDuration("Noelia: Oh! It looks like you don't have any Pals with you yet. Come back when you do, and I'll take good care of them!", 6000);
-                    Console.Clear();
+                    Typewriter.TypeLineWithDuration("Noelia: Oh, it seems you don't have any Pals with you right now. Come back when you do!", 4000);
+                    Console.WriteLine(CommandList.conversationCommands);
                     States.ChangeState(StateTypes.Exploring);
                     Player.Look();
-                    return;
                 }
             }
         }
@@ -215,28 +227,64 @@ public static class ConversationCommandHandler
         {
             if (Conditions.IsTrue(ConditionTypes.PlayerHasPotionForMatt))
             {
+                // Logic for when player has the potion for Matt
                 if (Player.HasItem("potion"))
                 {
+                    AudioManager.StopAllSoundEffects();
                     AudioManager.PlaySoundEffect("PotionDelivered.wav");
-                    Typewriter.TypeLineWithDuration("Matt: Is that... a potion? From Noelia? Oh, thank goodness! I was starting to think I'd be stuck like this forever.", 7000);
+                    Typewriter.TypeLineWithDuration("Matt: Is that... a potion? From Noelia? Oh, thank goodness! I was starting to think I'd be stuck like this forever.", 7500);
                     Player.RemoveItemFromInventory("potion");
                     Conditions.ChangeCondition(ConditionTypes.PlayerHasPotionForMatt, false); // Quest to deliver potion completed
+                    AudioManager.StopAllSoundEffects();
                     AudioManager.PlaySoundEffect("TakeThisKey.wav");
                     Typewriter.TypeLineWithDuration("Matt: Thanks, friend. I owe you one. Say... I know a secret. There's an old chest hidden in a cave not too far from here. Just head east from my cabin and take this key.", 10000);
                     Conditions.ChangeCondition(ConditionTypes.MattHasRevealedCave, true);
                     Player.AddItemToInventory("key");
-                    Typewriter.TypeLine($"A key has been added to your inventory.");
+                    Typewriter.TypeLine("A key has been added to your inventory.");
 
                     // Award XP for delivering the potion to Matt
                     int mattXpReward = 75;
                     if (Player.Pals.Any())
                     {
-                        Player.Pals[0].AddExperience(mattXpReward);
+                        Pal? chosenPalForMattXp;
+                        if (Player.Pals.Count == 1)
+                        {
+                            chosenPalForMattXp = Player.Pals[0];
+                        }
+                        else
+                        {
+                            // Use GetAvailablePals to only prompt for Pals that can receive XP
+                            var availablePals = Player.GetAvailablePals();
+                            if (availablePals.Count == 1)
+                            {
+                                chosenPalForMattXp = availablePals[0];
+                            }
+                            else if (availablePals.Count > 1)
+                            {
+                                chosenPalForMattXp = Player.PromptPalSelection(availablePals, "Which Pal should receive the XP from Matt?");
+                            }
+                            else // No available Pals (all fainted, though Player.Pals.Any() was true)
+                            {
+                                chosenPalForMattXp = null;
+                            }
+                        }
+
+                        if (chosenPalForMattXp != null)
+                        {
+                            chosenPalForMattXp.AddExperience(mattXpReward);
+                        }
+                        else if (!Player.GetAvailablePals().Any()) // Double check if no pals were truly available
+                        {
+                             Typewriter.TypeLine($"(You would have gained {mattXpReward} XP for helping Matt, but all your Pals are fainted!)");
+                        }
+                        // If chosenPalForMattXp is null due to cancellation, no message is needed here.
                     }
                     else
                     {
-                        Typewriter.TypeLine($"(You would have gained {mattXpReward} XP, but you have no Pals!)");
+                        Typewriter.TypeLine($"(You would have gained {mattXpReward} XP for helping Matt, but you have no Pals!)");
                     }
+
+                    States.ChangeState(StateTypes.Exploring);
                 }
                 else
                 {
@@ -248,10 +296,64 @@ public static class ConversationCommandHandler
                 // Default dialogue if player doesn't have the potion task or has already completed it.
                 Typewriter.TypeLine("Matt: Urgh... just trying to rest here. This old cabin isn't doing my cough any favors.");
             }
-            // After Matt's interaction, return to exploring
+            // After Matt's interaction, show commands then return to exploring
+            Console.WriteLine(CommandList.conversationCommands);
             States.ChangeState(StateTypes.Exploring);
             Player.Look();
-            // No pending choice for Matt, so don't print conversation commands or set pendingStarterChoice
+            // No pending choice for Matt, so don't print conversation commands or set pendingStarterChoice (already handled)
+        }
+        // Trainer Saul Logic
+        else if (npc.Name == "Trainer Saul")
+        {
+            if (Conditions.IsTrue(ConditionTypes.DefeatedTrainerSaul))
+            {
+                Typewriter.TypeLine("Trainer Saul: Grr... I'm training for our rematch! You got lucky last time!");
+                States.ChangeState(StateTypes.Exploring);
+                // Player.Look(); // Look is called later if no other interaction happens
+                return;
+            }
+
+            Typewriter.TypeLine("Trainer Saul: You think you're tough enough to face me, rookie?");
+            Typewriter.TypeLine("Trainer Saul challenges you to a battle!");
+            AudioManager.PlaySoundEffect("TrainerBattleStart.wav"); 
+
+            Game.ActiveTrainer = npc; 
+            Game.ActiveTrainerParty = new List<Pal>
+            {
+                Pals.GetPalByName("Lostling")!,
+                Pals.GetPalByName("Smiley")!,
+            };
+
+            foreach (var pal in Game.ActiveTrainerParty)
+            {
+                if (pal == null) continue; 
+                pal.GetType().GetProperty("Level")!.SetValue(pal, 5, null);
+                pal.MaxHP += 10 * 4; 
+                pal.HP = pal.MaxHP;
+                pal.BasicAttackUses = pal.MaxBasicAttackUses;
+                pal.SpecialAttackUses = pal.MaxSpecialAttackUses;
+            }
+            Game.CurrentTrainerPalIndex = 0;
+
+            Pal? firstSaulPal = Game.ActiveTrainerParty[Game.CurrentTrainerPalIndex];
+
+            if (firstSaulPal != null && firstSaulPal.HP > 0) // Ensure Pal is conscious
+            {
+                // BattleManager.StartBattle will handle Player Pal selection and set state to Fighting.
+                BattleManager.StartBattle(null, firstSaulPal, isTrainerBattle: true); 
+                // After StartBattle, control should return to the main game loop to process battle commands.
+                // The ConversationCommandHandler's job for initiating this specific Pal battle is done.
+                return; 
+            }
+            else
+            {
+                Typewriter.TypeLine("Trainer Saul: Huh? My Pals aren't ready! Lucky for you..."); // Should not happen with this setup
+                Game.ActiveTrainer = null; // Clear active trainer state
+                Game.ActiveTrainerParty = null;
+                States.ChangeState(StateTypes.Exploring);
+                // Player.Look(); // Look is called later
+                return;
+            }
         }
         // Default NPC
         else
@@ -312,15 +414,21 @@ public static class ConversationCommandHandler
         if (!string.IsNullOrEmpty(art))
             Console.WriteLine(art);
         Typewriter.TypeLine($"You chose {pal.Name} as your starter Pal!");
+        AudioManager.StopAllSoundEffects();
         AudioManager.PlaySoundEffect("AmazingPick.wav");
-        Typewriter.TypeLineWithDuration("Jon: Thats an amazing pick! Dont fuckin' abuse it or whatever take care of the little creature.", 4200);
+        Typewriter.TypeLineWithDuration("Jon: Thats an amazing pick! Dont fuckin' abuse it or whatever take care of the little creature.", 4400);
         awaitingStarterSelection = false;
         pendingStarterChoice = null;
+        AudioManager.PlaySoundEffect("LabChest.wav");
+        Typewriter.TypeLineWithDuration("Jon: Also, take this key. Try to open the chest in my Lab its been locked for a while.", 4100);
+        Player.AddItemToInventory("key");
+        Typewriter.TypeLine("A key has been added to your inventory.");
+        AudioManager.PlaySoundEffect("FightFirstPal.wav");
+        Typewriter.TypeLineWithDuration("Jon: Now go fight your first Pal!", 1650);
         Conditions.ChangeCondition(ConditionTypes.HasReceivedStarter, true);
         States.ChangeState(StateTypes.Exploring);
         Player.Look();
-        AudioManager.PlaySoundEffect("FightFirstPal.wav");
-        Typewriter.TypeLineWithDuration("Jon: Now go fight your first Pal!", 1500);
+        AudioManager.StopAllSoundEffects();
          
     }
 
@@ -338,6 +446,7 @@ public static class ConversationCommandHandler
 
     private static void PromptStarterSelection()
     {
+        AudioManager.StopAllSoundEffects();
         AudioManager.PlaySoundEffect("PickAnOption.wav");
         Typewriter.TypeLineWithDuration("\nPlease choose your starter pal:\n1. Sandie\n2. Clyde Capybara\n3. Gloop Glorp", 5000);
     }

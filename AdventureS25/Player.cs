@@ -38,6 +38,7 @@ public static class Player
         }
         if (CurrentLocation.CanMoveInDirection(command))
         {
+            Location? oldLocation = CurrentLocation;
             Location? newLocation = CurrentLocation.GetLocationInDirection(command);
             if (newLocation == null)
             {
@@ -47,7 +48,18 @@ public static class Player
                 Look(); // Show current location again
                 return;
             }
+
+            // Despawn Pal from old location
+            if (oldLocation != null)
+            {
+                oldLocation.ActiveWildPal = null;
+            }
+
             CurrentLocation = newLocation;
+
+            // Attempt to spawn a Pal in the new location
+            Game.TrySpawnWildPal(CurrentLocation); 
+
             Console.Clear();
             Console.WriteLine(CurrentLocation.GetDescription());
 
@@ -227,12 +239,23 @@ public static class Player
         Inventory.Add(item);
     }
 
-    public static void AddPal(Pal pal)
+    public static void AddPal(Pal palTemplate)
     {
-        if (!Pals.Contains(pal))
+        if (palTemplate == null) return;
+
+        Pal newPalInstance = palTemplate.Clone();
+
+        // Check if a Pal with the same name (or other unique identifier if you add one) already exists,
+        // depending on whether you want to allow multiple Pals of the same species.
+        // For now, we'll assume it's okay or that names are unique enough for this purpose.
+        if (!Pals.Contains(newPalInstance)) // This Contains check might need adjustment if it relies on reference equality
         {
-            Pals.Add(pal);
+            Pals.Add(newPalInstance);
+            // Optionally, confirm to the player:
+            // Typewriter.TypeLine($"{newPalInstance.Name} has been added to your collection!");
         }
+        // If you want to prevent adding if a Pal with the same name exists:
+        // else { Typewriter.TypeLine($"{newPalInstance.Name} is already in your collection."); }
     }
 
     public static List<Pal> GetAvailablePals()

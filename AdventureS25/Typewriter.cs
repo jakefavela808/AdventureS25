@@ -31,6 +31,7 @@ namespace AdventureS25
                     if (key.Key == ConsoleKey.Enter)
                     {
                         skipRequested = true;
+                        AudioManager.StopAllSoundEffects(); // Stop sounds on skip
                     }
                 }
                 Thread.Sleep(10);
@@ -57,6 +58,7 @@ namespace AdventureS25
                     if (key.Key == ConsoleKey.Enter)
                     {
                         skipRequested = true;
+                        AudioManager.StopAllSoundEffects(); // Stop sounds on skip
                     }
                 }
                 Thread.Sleep(10);

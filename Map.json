@@ -45,8 +45,15 @@
     },
     {
       "Name": "Cave",
-      "Description": "A dark cave deep in the woods. Echoes of dripping water can be heard in the distance, and the air is cool and damp.\nWest: Log Cabin\n",
-      "Connections": {"west": "Log Cabin"},
+      "Description": "A dark cave deep in the woods. Echoes of dripping water can be heard in the distance, and the air is cool and damp.\nWest: Log Cabin | North: Dark Cave Passage\n",
+      "Connections": {"west": "Log Cabin", "north": "Dark Cave Passage"},
+      "AsciiArt": "AsciiArt.caveLocation",
+      "AudioFile": "Cave.wav"
+    },
+    {
+      "Name": "Dark Cave Passage",
+      "Description": "A dark and eerie passage leading deeper into the cave.\nSouth: Cave\n",
+      "Connections": {"south": "Cave"},
       "AsciiArt": "AsciiArt.caveLocation",
       "AudioFile": "Cave.wav"
     }

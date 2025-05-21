@@ -4,12 +4,10 @@ using AdventureS25;
 
 public class Location
 {
-    public List<Pal> pals = new List<Pal>();
-    private List<Npc> npcs = new List<Npc>();
+    public List<string> PotentialPalNames { get; set; } = new List<string>(); // Names of Pals that can spawn
+    public Pal? ActiveWildPal { get; set; } // The currently active wild Pal for this visit
 
-    public void AddPal(Pal pal) { if (!pals.Contains(pal)) pals.Add(pal); }
-    public void RemovePal(Pal pal) { pals.Remove(pal); }
-    public IReadOnlyList<Pal> GetPals() => pals.AsReadOnly();
+    private List<Npc> npcs = new List<Npc>();
 
     public void AddNpc(Npc npc) { if (!npcs.Contains(npc)) npcs.Add(npc); }
     public void RemoveNpc(Npc npc) { npcs.Remove(npc); }
@@ -75,15 +73,10 @@ public class Location
                 fullDescription += $"\n{npc.Name} is here!";
             }
         }
-        // Show only ONE random Pal's initial description (no ASCII art)
-        if (pals.Count > 0)
+        // Show the active wild Pal's initial description (no ASCII art)
+        if (ActiveWildPal != null && !string.IsNullOrEmpty(ActiveWildPal.InitialDescription))
         {
-            var random = new Random();
-            var pal = pals[random.Next(pals.Count)];
-            if (!string.IsNullOrEmpty(pal.InitialDescription))
-            {
-                fullDescription += "\n" + pal.InitialDescription;
-            }
+            fullDescription += "\n" + ActiveWildPal.InitialDescription;
         }
 
         foreach (Item item in Items)

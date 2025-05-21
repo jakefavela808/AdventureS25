@@ -3,6 +3,7 @@
     {
       "Name": "Matt",
       "Description": "A wise man named Matt who lives in a cozy log cabin.",
+      "InitialDescription": "Matt stands here, ready to greet visitors at his log cabin.",
       "IsInteractable": true,
       "Location": "Log Cabin",
       "AsciiArt": "AsciiArt.mattCharacter"
@@ -10,6 +11,7 @@
     {
       "Name": "Professor Jon",
       "Description": "A local professor who studies Pals and their habitats.",
+      "InitialDescription": "Professor Jon is here, ready to give you your first Pals!",
       "IsInteractable": true,
       "Location": "Professor Jon's Lab",
       "AsciiArt": "AsciiArt.jonCharacter"
@@ -17,9 +19,18 @@
     {
       "Name": "Nurse Noelia",
       "Description": "A kind nurse with a calm demeanor who helps heal injured Pals.",
+      "InitialDescription": "Nurse Noelia stands behind the counter, ready to help heal your Pals.",
       "IsInteractable": true,
       "Location": "Pal Center",
       "AsciiArt": "AsciiArt.nurseCharacter"
+    },
+    {
+      "Name": "Trainer Saul",
+      "Description": "A creepy trainer with ghost-type Pals.",
+      "InitialDescription": "A trainer stands here, ready to challenge you to a battle.",
+      "IsInteractable": true,
+      "Location": "Dark Cave Passage",
+      "AsciiArt": "AsciiArt.saulCharacter"
     }
   ]
 }

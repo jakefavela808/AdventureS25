@@ -26,7 +26,21 @@
       "Description": "A mysterious chest.",
       "InitialDescription": "A chest sits here, waiting to be opened.",
       "IsTakeable": false,
-      "Location": "Cave"
+      "Location": "Dark Cave Passage"
+    },
+    {
+      "Name": "chest",
+      "Description": "A mysterious chest.",
+      "InitialDescription": "A chest sits here, waiting to be opened.",
+      "IsTakeable": false,
+      "Location": "Professor Jon's Lab"
+    },
+    {
+      "Name": "key",
+      "Description": "A small, old-fashioned key. It looks like it might unlock a chest.",
+      "InitialDescription": "A small key lies on the ground.",
+      "IsTakeable": true,
+      "Location": ""
     }
   ]
 }
