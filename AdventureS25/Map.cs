@@ -9,7 +9,7 @@ public static class Map
     private static Dictionary<string, Location> nameToLocation = 
         new Dictionary<string, Location>();
     public static Location? StartLocation { get; set; }
-    public static string? StartupAudioFile { get; private set; } // Optional startup audio
+    public static string? StartupAudioFile { get; private set; }
     
     public static void Initialize()
     {
@@ -21,12 +21,9 @@ public static class Map
         if (data == null || data.Locations == null)
         {
             Typewriter.TypeLine("[ERROR] Map.json could not be loaded or is empty/malformed.");
-            // Consider if the game can even run without a map. Maybe throw an exception or exit.
-            // StartLocation is already nullable, so no special handling needed here for its assignment if we return early.
             return;
         }
 
-        // make all the locations
         Dictionary<string, Location> locations = new Dictionary<string, Location>();
         foreach (LocationJsonData locationData in data.Locations)
         {
@@ -36,18 +33,16 @@ public static class Map
                 continue;
             }
 
-            string? audioFile = locationData.AudioFile; // Capture per-location audio file name
+            string? audioFile = locationData.AudioFile;
             string? asciiArtString = null;
             if (!string.IsNullOrEmpty(locationData.AsciiArt))
             {
                 string artKey = locationData.AsciiArt;
-                // If the value is like 'AsciiArt.cityLocation', extract 'cityLocation'
                 int dotIdx = artKey.IndexOf('.');
                 if (dotIdx >= 0 && dotIdx < artKey.Length - 1)
                 {
                     artKey = artKey.Substring(dotIdx + 1);
                 }
-                // Support both field and property lookup
                 var asciiArtField = typeof(AsciiArt).GetField(artKey, System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
                 if (asciiArtField != null)
                 {
@@ -65,13 +60,10 @@ public static class Map
             Location newLocation = AddLocation(locationData.Name, locationData.Description, asciiArtString, audioFile);
             locations[locationData.Name] = newLocation;
         }
-        
-        // setup all the connections
         foreach (LocationJsonData locationData in data.Locations)
         {
             if (locationData.Name == null || !locations.ContainsKey(locationData.Name) || locationData.Connections == null)
             {
-                // If name was null, it was skipped above. If connections are null, nothing to do.
                 continue; 
             }
             Location currentLocation = locations[locationData.Name];
@@ -91,7 +83,7 @@ public static class Map
             }
         }
 
-        StartupAudioFile = data.StartupAudioFile; // Read startup audio filename
+        StartupAudioFile = data.StartupAudioFile;
 
         if (data.StartLocation != null && locations.TryGetValue(data.StartLocation, out Location? foundStartLocation))
         {
@@ -100,19 +92,18 @@ public static class Map
         else if (locations.Count > 0)
         {
             Typewriter.TypeLine(data.StartLocation == null ? "[WARNING] StartLocation not specified in Map.json. Defaulting to first loaded location." : "[WARNING] Specified StartLocation '" + (data.StartLocation ?? "null") + "' not found in Map.json. Defaulting to first loaded location.");
-            StartLocation = locations.Values.First(); // Fallback to the first location if StartLocation is invalid or missing
+            StartLocation = locations.Values.First();
         }
         else
         {
             Typewriter.TypeLine("[ERROR] No locations loaded and no StartLocation specified. Map initialization failed. StartLocation will be null.");
-            // StartLocation will remain null. Player initialization or game start logic should check for this.
         }
     }
 
     private static Location AddLocation(string locationName, string locationDescription, string? asciiArt = null, string? audioFile = null)
     {
         Location newLocation = new Location(locationName, locationDescription, asciiArt);
-        newLocation.AudioFile = audioFile; // Assign audio file reference
+        newLocation.AudioFile = audioFile;
         nameToLocation.Add(locationName, newLocation);
         return newLocation;
     }
@@ -145,8 +136,6 @@ public static class Map
         }
         else
         { 
-            // It's better to return null if not found and let caller handle it.
-            // Typewriter.TypeLine("Location not found: " + locationName); 
             return null;
         }
     }

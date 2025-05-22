@@ -14,8 +14,8 @@ public enum ConditionTypes
     IsTeleported,
     IsCreatedConnection,
     IsRemovedConnection,
-    PlayerNeedsFirstHealFromNoelia, // Triggers Noelia's initial quest dialogue
-    PlayerHasPotionForMatt,           // Player has the potion to deliver to Matt
-    MattHasRevealedCave,            // Matt has told the player about the secret cave
-    DefeatedTrainerSaul             // Player has defeated Trainer Saul
+    PlayerNeedsFirstHealFromNoelia,
+    PlayerHasPotionForMatt,
+    MattHasRevealedCave,
+    DefeatedTrainerSaul
 }

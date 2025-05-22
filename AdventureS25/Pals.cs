@@ -28,13 +28,11 @@ public static class Pals
                 continue;
             }
             nameToPal[pal.Name] = pal;
-            pal.InitializeStatsForLevel(); // Ensure Pal's stats are initialized based on its Level
+            pal.InitializeStatsForLevel();
 
             if (pal.Location == null)
             {
-                // Decide if pals must have a location or if this is a valid state (e.g. starter pal)
-                // Console.WriteLine($"[INFO] Pal '{pal.Name}' does not have an initial location specified.");
-                continue; // Or handle differently
+                continue;
             }
 
             var location = Map.GetLocationByName(pal.Location);

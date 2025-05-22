@@ -16,14 +16,12 @@ public static class Items
 
         if (data == null || data.Items == null)
         {
-            // Log an error or handle the case where Items.json is empty or malformed
             Console.WriteLine("[ERROR] Items.json could not be loaded or is empty.");
             return;
         }
 
         foreach (ItemJsonData item in data.Items)
         {
-            // Provide default values for name, description, and initialDescription if they are null
             string itemName = item.Name ?? "Unnamed Item";
             string itemDescription = item.Description ?? "No description.";
             string itemInitialDescription = item.InitialDescription ?? "It's an item.";
@@ -31,7 +29,6 @@ public static class Items
             Item newItem = CreateItem(itemName, itemDescription,
                 itemInitialDescription, item.IsTakeable);
             
-            // Only add item to map if a location is specified
             if (!string.IsNullOrEmpty(item.Location))
             {
                 Map.AddItem(newItem.Name, item.Location); 

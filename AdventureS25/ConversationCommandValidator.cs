@@ -6,7 +6,6 @@ public static class ConversationCommandValidator
 {
     public static bool IsValid(Command command)
     {
-        // Check if we're awaiting starter selection
         var awaitingStarterSelection = ConversationCommandHandler.IsAwaitingStarterSelection();
         if (awaitingStarterSelection)
         {

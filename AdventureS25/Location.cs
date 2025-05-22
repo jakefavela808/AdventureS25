@@ -4,8 +4,8 @@ using AdventureS25;
 
 public class Location
 {
-    public List<string> PotentialPalNames { get; set; } = new List<string>(); // Names of Pals that can spawn
-    public Pal? ActiveWildPal { get; set; } // The currently active wild Pal for this visit
+    public List<string> PotentialPalNames { get; set; } = new List<string>();
+    public Pal? ActiveWildPal { get; set; }
 
     private List<Npc> npcs = new List<Npc>();
 
@@ -15,7 +15,6 @@ public class Location
 
     private string? asciiArt;
 
-    // Optional audio file name for this location
     public string? AudioFile { get; set; }
 
     private string name;
@@ -59,21 +58,17 @@ public class Location
         {
             fullDescription += asciiArt;
         }
-        // Add explore commands after art, before description
         fullDescription += "\n" + CommandList.exploreCommands + "\n";
 
         fullDescription += Description;
 
-        // Show NPCs in the location (no ASCII art, just initial description)
         foreach (Npc npc in npcs)
         {
-            // Simply state that the NPC is present
-            if (npc != null) // Basic check to ensure npc object exists
+            if (npc != null)
             {
                 fullDescription += $"\n{npc.Name} is here!";
             }
         }
-        // Show the active wild Pal's initial description (no ASCII art)
         if (ActiveWildPal != null && !string.IsNullOrEmpty(ActiveWildPal.InitialDescription))
         {
             fullDescription += "\n" + ActiveWildPal.InitialDescription;

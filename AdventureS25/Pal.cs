@@ -39,19 +39,15 @@ public class Pal
         Moves = moves;
         MaxHP = maxHP;
         HP = maxHP;
-
         Level = 1;
         ExperiencePoints = 0;
-        ExperienceToNextLevel = 100; // Initial XP for next level
-
-        MaxBasicAttackUses = 15; // Default max basic attack uses
+        ExperienceToNextLevel = 100;
+        MaxBasicAttackUses = 15;
         BasicAttackUses = MaxBasicAttackUses;
-        MaxSpecialAttackUses = 5;  // Default max special attack uses
+        MaxSpecialAttackUses = 5;
         SpecialAttackUses = MaxSpecialAttackUses;
-
-        // Base damage stats
-        BaseAttackDamage = 10; // Default base attack damage
-        BaseSpecialAttackDamage = 15; // Default base special attack damage
+        BaseAttackDamage = 10;
+        BaseSpecialAttackDamage = 15;
     }
 
     public void AddExperience(int amount, bool suppressMessage = false)
@@ -75,24 +71,18 @@ public class Pal
         Level++;
         Typewriter.TypeLine($"{Name} grew to Level {Level}!");
 
-        // Stat increases
-        int hpIncrease = 10; // Example: Increase MaxHP by 10 each level
+        int hpIncrease = 10;
         MaxHP += hpIncrease;
-        HP = MaxHP; // Heal to new max HP
+        HP = MaxHP;
 
-        // Increase damage stats
         int attackIncrease = 2;
         BaseAttackDamage += attackIncrease;
 
         int specialAttackIncrease = 3;
         BaseSpecialAttackDamage += specialAttackIncrease;
 
-        ExperiencePoints -= ExperienceToNextLevel; // Subtract XP used for this level
-        ExperienceToNextLevel = Level * 100; // Example: Next level requires Level * 100 XP
-                                             // Or use a more scaling formula like (int)(ExperienceToNextLevel * 1.25) for a 25% increase
-
-        // If XP still exceeds new threshold (e.g., gained multiple levels at once)
-        // The while loop in AddExperience will handle calling LevelUp again.
+        ExperiencePoints -= ExperienceToNextLevel;
+        ExperienceToNextLevel = Level * 100;
     }
 
     public void InitializeStatsForLevel()
@@ -102,34 +92,18 @@ public class Pal
         if (this.Level == 1)
         {
             this.ExperiencePoints = 0;
-            this.ExperienceToNextLevel = 100; // Base XP for Lvl 1 to reach Lvl 2
+            this.ExperienceToNextLevel = 100;
             this.HP = this.MaxHP;
             return;
         }
 
-        // Reset to Level 1 base stats before calculation.
-        // The constructor sets MaxHP, BaseAttackDamage, BaseSpecialAttackDamage to Lvl 1 values.
-        // These are assumed to be the true Lvl 1 base stats.
-
         int simulatedCurrentLevel = 1;
-        // ExperiencePoints for Lvl 1 is 0, ExperienceToNextLevel for Lvl 1 to reach Lvl 2 is 100.
-        // These are set by the constructor and don't need to be reset if Level > 1 initially.
-        // However, to be safe and clear, especially if this method could be called in other contexts:
         this.ExperiencePoints = 0;
-        this.ExperienceToNextLevel = 100; // XP to reach Lvl 2
-
-        // Re-fetch Lvl 1 stats if they could have been modified from constructor defaults.
-        // This part is tricky without knowing the exact design of how base stats are stored vs modified.
-        // For now, we assume the current MaxHP, BaseAttackDamage, etc., ARE the Lvl 1 base values
-        // if this method is called right after deserialization and before any other modifications.
-        // If not, one would typically fetch base stats from a definition or reset them to known Lvl 1 constants.
-        // Let's proceed assuming current values are Lvl 1 base if Level was >1 from JSON.
-
+        this.ExperienceToNextLevel = 100;
         while (simulatedCurrentLevel < this.Level)
         {
             simulatedCurrentLevel++;
 
-            // Stat increases (must match LevelUp() method's increments)
             int hpIncrease = 10;
             this.MaxHP += hpIncrease;
 
@@ -139,12 +113,11 @@ public class Pal
             int specialAttackIncrease = 3;
             this.BaseSpecialAttackDamage += specialAttackIncrease;
 
-            // Update ExperienceToNextLevel for the *new* simulatedCurrentLevel
             this.ExperienceToNextLevel = simulatedCurrentLevel * 100;
         }
 
-        this.ExperiencePoints = 0; // Ensure XP is 0 at the target level
-        this.HP = this.MaxHP;      // Heal to new max HP
+        this.ExperiencePoints = 0;
+        this.HP = this.MaxHP;
     }
 
     public string GetLocationDescription()
@@ -154,9 +127,6 @@ public class Pal
 
     public Pal Clone()
     {
-        // MemberwiseClone performs a shallow copy. If Pal contains complex reference types
-        // that should be unique per instance (e.g., a list of status effects that can change),
-        // a more detailed deep copy would be needed for those members.
         return (Pal)this.MemberwiseClone();
     }
 

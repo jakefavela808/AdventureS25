@@ -84,7 +84,6 @@ public static class ExplorationCommandHandler
 
     private static void ChangeToTalkState(Command command)
     {
-        // Block talking to Professor Jon after starter received
         var npcs = Player.CurrentLocation?.GetNpcs();
         if (npcs != null && npcs.Any(npc => npc.Name == "Professor Jon") && Conditions.IsTrue(ConditionTypes.HasReceivedStarter))
         {
@@ -192,7 +191,7 @@ public static class ExplorationCommandHandler
         }
         else
         {
-            AudioManager.ToggleMute(); // This will mute and print "Audio muted."
+            AudioManager.ToggleMute();
         }
     }
 
@@ -204,43 +203,34 @@ public static class ExplorationCommandHandler
         }
         else
         {
-            AudioManager.ToggleMute(); // This will unmute and print "Audio unmuted."
+            AudioManager.ToggleMute();
         }
     }
 
     private static void HandleOpen(Command command)
     {
-        // Only allow opening a chest if the command is exactly 'open chest'.
-        // If the noun is missing or not 'chest', do nothing (let the parser/validator/game handle it).
         if (string.IsNullOrWhiteSpace(command.Noun) || command.Noun.ToLower() != "chest")
         {
-            // It's good practice to provide feedback if the command is 'open' but the noun is wrong.
-            // However, if the design is to silently ignore 'open anything_else', then return is fine.
-            // For now, let's assume the current behavior of returning for 'open something_else' is intended.
             return;
         }
 
-        // Only proceed if the noun is exactly 'chest'.
         var chestItem = Player.CurrentLocation?.Items?.FirstOrDefault(item => item.Name.ToLower() == "chest");
 
         if (chestItem != null)
         {
             if (Player.HasItem("key"))
             {
-                Player.RemoveItemFromInventory("key"); // Use the key
+                Player.RemoveItemFromInventory("key");
                 AudioManager.PlaySoundEffect("ChestOpening.wav");
                 Typewriter.TypeLine("You use a key to unlock the chest...");
 
+                Player.CurrentLocation?.RemoveItem(chestItem);
 
-                // For simplicity, we remove the chest. 
-                // A more complex system might mark it as 'opened'.
-                Player.CurrentLocation?.RemoveItem(chestItem); // Avoid null dereference
-
-                int numPotions = random.Next(0, 3); // 0, 1, or 2 potions
-                int numTreats = random.Next(0, 4);  // 0, 1, 2, or 3 treats
-                int gainedXp = random.Next(25, 76); // 25 to 75 XP
+                int numPotions = random.Next(0, 3); 
+                int numTreats = random.Next(0, 4);
+                int gainedXp = random.Next(25, 76); 
                 string lootMessage = "You find: ";
-                Pal? palToReceiveXp = null; // Declare here and make nullable
+                Pal? palToReceiveXp = null; 
 
                 if (numPotions == 0 && numTreats == 0 && gainedXp == 0)
                 {
@@ -277,16 +267,14 @@ public static class ExplorationCommandHandler
                         }
                         lootMessage += $"\n- {palToReceiveXp.Name} gained {gainedXp} XP";
                     }
-                    else if (gainedXp > 0) // Player has no pals but XP was rolled
+                    else if (gainedXp > 0)
                     {
                         lootMessage += $"\n- {gainedXp} XP (You have no Pals to gain this XP!)";
                     }
                 }
-                //Typewriter.TypeLine("Opening chest...");
                 ChestAnimation();
                 AudioManager.PlaySoundEffect("Loot.wav");
-                // Grant XP after animation and before loot message
-                if (palToReceiveXp != null && gainedXp > 0) // Check palToReceiveXp is not null
+                if (palToReceiveXp != null && gainedXp > 0)
                 {
                     palToReceiveXp.AddExperience(gainedXp, suppressMessage: true);
                 }
@@ -295,8 +283,8 @@ public static class ExplorationCommandHandler
             else
             {
                 Typewriter.TypeLine("The chest is locked. You need a key to open it.");
-                Console.Clear(); // Optional: clear screen after message
-                Player.Look();   // Optional: show current location info
+                Console.Clear();
+                Player.Look();
             }
         }
         else
@@ -305,8 +293,6 @@ public static class ExplorationCommandHandler
             Console.Clear();
             Player.Look();
         }
-        // Consider if Player.Look() is needed here or if the loot message is enough.
-        // For now, let the loot message be the primary feedback.
     }
 
     public static void ChestAnimation()

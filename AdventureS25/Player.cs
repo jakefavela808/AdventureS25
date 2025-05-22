@@ -1,7 +1,7 @@
 namespace AdventureS25;
 
 using AdventureS25;
-using System.IO; // Potentially needed if AudioManager path logic changes
+using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -16,8 +16,6 @@ public static class Player
         Inventory = new List<Item>();
         Pals = new List<Pal>();
         CurrentLocation = Map.StartLocation; 
-        // It's crucial that the game's main loop or startup sequence checks if Player.CurrentLocation is null after this
-        // and handles it appropriately (e.g., by exiting or showing an error if the map couldn't be initialized).
     }
 
     public static void Move(Command command)
@@ -28,8 +26,7 @@ public static class Player
             return;
         }
 
-        // Only require HasReadNote condition
-        if (CurrentLocation == Map.StartLocation && !Conditions.IsTrue(ConditionTypes.HasReadNote)) // Map.StartLocation can also be null
+        if (CurrentLocation == Map.StartLocation && !Conditions.IsTrue(ConditionTypes.HasReadNote))
         {
             Typewriter.TypeLine("You should read the note before leaving!");
             Console.Clear();
@@ -43,13 +40,11 @@ public static class Player
             if (newLocation == null)
             {
                 Typewriter.TypeLine("Error: Tried to move to a null location.");
-                // Potentially log this error for debugging map connections
                 Console.Clear();
-                Look(); // Show current location again
+                Look();
                 return;
             }
 
-            // Despawn Pal from old location
             if (oldLocation != null)
             {
                 oldLocation.ActiveWildPal = null;
@@ -57,14 +52,13 @@ public static class Player
 
             CurrentLocation = newLocation;
 
-            // Attempt to spawn a Pal in the new location
             Game.TrySpawnWildPal(CurrentLocation); 
 
             Console.Clear();
             Console.WriteLine(CurrentLocation.GetDescription());
 
             PlayNarrativeIfNeeded(CurrentLocation);
-            AudioManager.PlayLooping(CurrentLocation.AudioFile); // Play new location's audio
+            AudioManager.PlayLooping(CurrentLocation.AudioFile);
 
         }
         else
@@ -87,7 +81,6 @@ public static class Player
             Typewriter.TypeLine("Error: Current location is not set. Cannot take items.");
             return;
         }
-        // figure out which item to take: turn the noun into an item
         Item? item = Items.GetItemByName(command.Noun);
 
         if (item == null)
@@ -155,7 +148,6 @@ public static class Player
             foreach (Pal pal in Pals)
             {
                 Typewriter.TypeLine($"\n{pal.Name} - HP: {pal.HP}/{pal.MaxHP}");
-                // Print resolved ASCII art above description
                 string art = pal.AsciiArt;
                 if (!string.IsNullOrEmpty(art) && art.StartsWith("AsciiArt."))
                 {
@@ -245,25 +237,16 @@ public static class Player
 
         Pal newPalInstance = palTemplate.Clone();
 
-        // Check if a Pal with the same name (or other unique identifier if you add one) already exists,
-        // depending on whether you want to allow multiple Pals of the same species.
-        // For now, we'll assume it's okay or that names are unique enough for this purpose.
-        if (!Pals.Contains(newPalInstance)) // This Contains check might need adjustment if it relies on reference equality
+        if (!Pals.Contains(newPalInstance))
         {
             Pals.Add(newPalInstance);
-            // Optionally, confirm to the player:
-            // Typewriter.TypeLine($"{newPalInstance.Name} has been added to your collection!");
         }
-        // If you want to prevent adding if a Pal with the same name exists:
-        // else { Typewriter.TypeLine($"{newPalInstance.Name} is already in your collection."); }
     }
 
     public static List<Pal> GetAvailablePals()
     {
         return Pals.Where(p => p.HP > 0).ToList();
     }
-
-    // Prompts the player to select a Pal from a provided list
     public static Pal? PromptPalSelection(List<Pal> palList, string prompt)
     {
         if (palList == null || palList.Count == 0)
@@ -296,7 +279,6 @@ public static class Player
 
     public static void RemoveItemFromInventory(string itemName)
     {
-        // Remove the first item in inventory whose name matches, case-insensitive
         var itemToRemove = Inventory.FirstOrDefault(i => i.Name.Equals(itemName, StringComparison.OrdinalIgnoreCase));
         if (itemToRemove != null)
         {
@@ -306,13 +288,12 @@ public static class Player
 
     public static void MoveToLocation(string locationName)
     {
-        // look up the location object based on the name
         Location? loc = Map.GetLocationByName(locationName);
         if (loc != null)
         {
             CurrentLocation = loc;
             PlayNarrativeIfNeeded(CurrentLocation);
-            AudioManager.PlayLooping(CurrentLocation.AudioFile); // Play new location's audio
+            AudioManager.PlayLooping(CurrentLocation.AudioFile);
             Look();
             AudioManager.Stop();
         }
@@ -323,7 +304,6 @@ public static class Player
         }
     }
 
-    // Helper to play narrative sound effect for key locations
     public static void PlayNarrativeIfNeeded(Location? location)
     {
         if (location == null) return;
@@ -378,7 +358,7 @@ public static class Player
     {
         if (Pals.Count == 0)
         {
-            return false; // No pals to heal
+            return false; 
         }
 
         foreach (var pal in Pals)
@@ -387,6 +367,6 @@ public static class Player
             pal.BasicAttackUses = pal.MaxBasicAttackUses;
             pal.SpecialAttackUses = pal.MaxSpecialAttackUses;
         }
-        return true; // Healing was performed
+        return true; 
     }
 }

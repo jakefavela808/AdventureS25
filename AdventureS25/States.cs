@@ -16,7 +16,7 @@ public static class States
         Add(StateTypes.Exploring);
         Add(StateTypes.Fighting);
         Add(StateTypes.Talking);
-        Add(StateTypes.GameOver); // Added for game completion
+        Add(StateTypes.GameOver);
         
         ChangeState(StateTypes.Exploring);
     }
@@ -36,7 +36,5 @@ public static class States
         }
         CurrentState = states[stateType];
         CurrentStateType = stateType;
-        
-        //Typewriter.TypeLine("Changing to state " + stateType);
     }
 }

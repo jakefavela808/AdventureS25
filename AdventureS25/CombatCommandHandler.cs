@@ -15,7 +15,6 @@ public static class CombatCommandHandler
 
     public static void Fight(Command command)
     {
-        // Check if there's an active wild Pal in the current location
         Pal? wildPal = Player.CurrentLocation?.ActiveWildPal;
 
         if (wildPal == null)
@@ -26,26 +25,13 @@ public static class CombatCommandHandler
             return;
         }
 
-        // If the player has no Pals, they can't fight.
         if (!Player.Pals.Any())
         {
             Typewriter.TypeLine("You have no Pals to fight with!");
             return;
         }
-
-        // Player has Pals, proceed to battle setup
         Typewriter.TypeLine($"A wild {wildPal.Name} appears!");
-        // SoundManager.PlaySound("Sounds/battle_start.wav"); // Battle start sound
-
-        // Start battle with the active wild Pal
-        // The BattleManager.StartBattle will handle Pal selection if playerPal is null.
         BattleManager.StartBattle(null, wildPal);
-
-        // State change is now handled by BattleManager.StartBattle if successful.
-        // if (BattleManager.IsBattleActive) // Check if battle actually started
-        // {
-        //     States.ChangeState(StateTypes.Fighting);
-        // }
     }
     
     public static void Handle(Command command)
@@ -139,8 +125,6 @@ public static class CombatCommandHandler
             States.ChangeState(StateTypes.Exploring);
         }
     }
-
-    // Helper method to resolve AsciiArt keys to actual art
     public static string GetAsciiArt(string artKey)
     {
         if (string.IsNullOrEmpty(artKey)) return "";
