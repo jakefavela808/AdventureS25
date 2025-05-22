@@ -13,6 +13,8 @@ public static class Game
     public static int CurrentTrainerPalIndex { get; set; }
     public static List<Pal>? ActiveTrainerParty { get; set; }
 
+    public static bool ContinueMainLoop { get; set; } = true;
+
     public static void TrySpawnWildPal(Location location)
     {
         if (location == null || !location.PotentialPalNames.Any())
@@ -61,9 +63,10 @@ public static class Game
     public static void PlayGame()
     {
         Initialize();
+        ContinueMainLoop = true; // Ensure it's true when game starts
         AudioManager.PlayOnce(Map.StartupAudioFile); // Play startup audio
         bool validMenuChoice = false;
-        while (!validMenuChoice)
+        while (!validMenuChoice && ContinueMainLoop)
         {
             Console.Clear();
             Console.WriteLine(AsciiArt.titleAndLogo);
@@ -80,27 +83,30 @@ public static class Game
             
                 Player.PlayNarrativeIfNeeded(Player.CurrentLocation);
                 AudioManager.PlayLooping(Player.CurrentLocation?.AudioFile); // Play starting location audio
-                bool isPlaying = true;
-                while (isPlaying)
+                while (ContinueMainLoop)
                 {
                     Command command = CommandProcessor.Process();
+                    if (!ContinueMainLoop) break; // Check flag after Process() in case it blocks and flag changes
+
                     if (command.IsValid)
                     {
                         if (command.Verb == "exit")
                         {
                             Typewriter.TypeLine("Game Over!");
-                            isPlaying = false;
+                            ContinueMainLoop = false;
                         }
                         else
                         {
                             CommandHandler.Handle(command);
                         }
                     }
+                    // If ContinueMainLoop was set to false by CommandHandler.Handle (e.g. via BattleManager), the loop will terminate.
                 }
             }
             else if (mainMenuInput == "2")
             {
                 Typewriter.TypeLine("Goodbye!");
+                ContinueMainLoop = false;
                 validMenuChoice = true;
             }
             else

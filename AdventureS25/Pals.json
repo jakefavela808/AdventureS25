@@ -8,6 +8,7 @@
       "Location": "",
       "AsciiArt": "AsciiArt.sandiePal",
       "Moves": ["Quantum Chomp", "Corgi Overdrive"]
+
     },
     {
       "Name": "Clyde Capybara",
@@ -61,7 +62,8 @@
       "IsAcquirable": true,
       "Location": "Cave",
       "AsciiArt": "AsciiArt.lostlingPal",
-      "Moves": ["Deep Stare", "Bite"]
+      "Moves": ["Deep Stare", "Bite"],
+      "Level": 3
     },
     {
       "Name": "Smiley",
@@ -70,7 +72,8 @@
       "IsAcquirable": true,
       "Location": "Cave",
       "AsciiArt": "AsciiArt.smileyPal",
-      "Moves": ["Smile", "Ghostly Whisper"]
+      "Moves": ["Smile", "Ghostly Whisper"],
+      "Level": 3
     }
   ]
 }

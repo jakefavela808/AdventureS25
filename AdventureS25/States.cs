@@ -16,6 +16,7 @@ public static class States
         Add(StateTypes.Exploring);
         Add(StateTypes.Fighting);
         Add(StateTypes.Talking);
+        Add(StateTypes.GameOver); // Added for game completion
         
         ChangeState(StateTypes.Exploring);
     }

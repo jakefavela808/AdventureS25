@@ -88,7 +88,7 @@ public static class ExplorationCommandHandler
         var npcs = Player.CurrentLocation?.GetNpcs();
         if (npcs != null && npcs.Any(npc => npc.Name == "Professor Jon") && Conditions.IsTrue(ConditionTypes.HasReceivedStarter))
         {
-            Typewriter.TypeLine("You have already received your first Pal. Professor Jon is busy right now and doesn't have anything else for you.");
+            Typewriter.TypeLine("Professor Jon is busy right now and doesn't have anything else for you.");
             Console.Clear();
             Player.Look();
             return;

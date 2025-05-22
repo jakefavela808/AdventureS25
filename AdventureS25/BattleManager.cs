@@ -32,34 +32,87 @@ public static class BattleManager
         {
             wildPal.HP = wildPal.MaxHP; // Reset HP for new opponent
             wildPal.ResetAttackUses();  // Reset attack uses
+            if (isTrainerBattle) // Trainers' Pals are not acquirable
+            {
+                wildPal.IsAcquirable = false;
+            }
+            // else, for wild Pals, IsAcquirable remains as defined in Pals.json (true by default)
         }
 
+        // Player Pal Selection Logic - only if not a mid-trainer battle switch for the opponent
         if (!isMidTrainerBattleSwitch)
         {
             previousLocationAudio = Player.CurrentLocation?.AudioFile;
-        }
+            var availablePals = Player.GetAvailablePals();
 
-        // Determine Player's Pal
-        if (player != null && player.HP > 0) // Player's Pal was pre-selected and is healthy
-        {
-            playerPal = player;
-        }
-        else
-        {
-            playerPal = Player.GetAvailablePals().FirstOrDefault();
-            if (playerPal == null) // No available Pals
+            if (availablePals.Count == 0)
             {
                 Typewriter.TypeLine("All your Pals have fainted! You cannot battle.");
                 isBattleActive = false;
                 States.ChangeState(StateTypes.Exploring);
+                if (previousLocationAudio != null) AudioManager.PlayLooping(previousLocationAudio); // Restore previous audio
                 return;
             }
-            // Only announce "You send out..." if it's not a mid-battle switch where the player's Pal hasn't changed.
-            // If it IS a mid-battle switch, the player's Pal is assumed to be the same one continuing.
-            if (!isMidTrainerBattleSwitch) 
+            else if (availablePals.Count == 1)
             {
-                 Typewriter.TypeLine($"You send out {playerPal.Name}!");
+                playerPal = availablePals.First();
+                Typewriter.TypeLine($"You send out {playerPal.Name}!");
             }
+            else // More than one Pal, let player choose
+            {
+                Typewriter.TypeLine("\nWhich Pal do you want to send out?");
+                for (int i = 0; i < availablePals.Count; i++)
+                {
+                    Typewriter.TypeLine($"{i + 1}. {availablePals[i].Name} (Lvl {availablePals[i].Level}, HP: {availablePals[i].HP}/{availablePals[i].MaxHP})");
+                }
+
+                int choice = -1;
+                while (choice < 1 || choice > availablePals.Count)
+                {
+                    Console.Write("Enter the number of your choice: "); // Changed from Typewriter.Type
+                    string? input = Console.ReadLine();
+                    if (int.TryParse(input, out int numChoice) && numChoice >= 1 && numChoice <= availablePals.Count)
+                    {
+                        choice = numChoice;
+                    }
+                    else
+                    {
+                        Typewriter.TypeLine("Invalid choice. Please enter a number from the list.");
+                    }
+                }
+                playerPal = availablePals[choice - 1];
+                Typewriter.TypeLine($"You send out {playerPal.Name}!");
+            }
+        }
+        else // This is a mid-trainer battle switch (opponent is switching)
+        {
+            // playerPal should already be set from the ongoing battle.
+            // If playerPal fainted and forced a player-side switch, that's handled by HandlePlayerPalFainted -> ChooseNextPal.
+            // This StartBattle call (isMidTrainerBattleSwitch = true) is for when the OPPONENT switches.
+            // So, playerPal should persist from the player's current active Pal.
+            if (playerPal == null || playerPal.HP <= 0) // Should not happen if player switch logic is correct
+            {
+                Typewriter.TypeLine("Error: Player's active Pal is unexpectedly unavailable during opponent switch.");
+                // Attempt to recover by selecting another Pal, but this indicates a logic flaw elsewhere.
+                playerPal = Player.GetAvailablePals().FirstOrDefault();
+                if (playerPal == null)
+                {
+                    Typewriter.TypeLine("All your Pals have fainted! Battle ends.");
+                    EndBattle(); // Changed from HandleBattleEnd(false)
+                    return;
+                }
+                Typewriter.TypeLine($"Auto-selecting {playerPal.Name} to continue.");
+            }
+        }
+
+        // Ensure a playerPal is selected if we've reached this point (especially after player choice or default selection)
+        if (playerPal == null)
+        {
+            Typewriter.TypeLine("Critical Error: No player Pal selected for battle.");
+            isBattleActive = false;
+            States.ChangeState(StateTypes.Exploring);
+            if (previousLocationAudio != null && !isMidTrainerBattleSwitch) AudioManager.PlayLooping(previousLocationAudio);
+            return;
         }
 
         States.ChangeState(StateTypes.Fighting);
@@ -86,6 +139,7 @@ public static class BattleManager
 
             // Display details for the opponent Pal
             Console.WriteLine(CombatCommandHandler.GetAsciiArt(wildPal.AsciiArt));
+            Typewriter.TypeLine($"{wildPal.Name} - LVL {wildPal.Level}");
             Typewriter.TypeLine($"{wildPal.Description}"); // Opponent description
             Typewriter.TypeLine($"HP: {wildPal.HP}/{wildPal.MaxHP}"); // Opponent HP
             if (wildPal.Moves != null && wildPal.Moves.Count > 0)
@@ -98,7 +152,6 @@ public static class BattleManager
         }
         else // Mid-Trainer Battle Switch display
         {
-            Console.Clear();
             if (Game.ActiveTrainer != null && wildPal != null)
             {
                 Typewriter.TypeLine($"{Game.ActiveTrainer.Name} sent out {wildPal.Name}!");
@@ -107,12 +160,19 @@ public static class BattleManager
             {
                 Typewriter.TypeLine($"Opponent sent out {wildPal.Name}!");
             }
-            Typewriter.TypeLineWithDuration("----------------------------------------------------", 250); // Shorter visual separator
         }
 
         // Common display for both scenarios
-        PrintHpStatus();
-        Console.WriteLine(CommandList.combatCommands);
+        //PrintHpStatus();
+        if (!isMidTrainerBattleSwitch) // Only print commands for a full battle start or if player's turn normally
+        {
+            Console.WriteLine(CommandList.combatCommands);
+        }
+
+        // MODIFIED global debug line to be conditional for NEW battles only
+        if (!isMidTrainerBattleSwitch) 
+        {
+        }
     }
 
     public static void HandlePlayerAction(string action)
@@ -187,7 +247,6 @@ public static class BattleManager
                     Typewriter.TypeLine("You successfully ran away!");
                     EndBattle();
                     States.ChangeState(StateTypes.Exploring);
-                    Player.Look();
                     AudioManager.Stop();
                     AudioManager.PlayLooping(previousLocationAudio);
                     return;
@@ -382,12 +441,12 @@ public static class BattleManager
 
     private static void CheckAndTriggerFirstWinTutorial()
     {
-        if (Conditions.IsTrue(ConditionTypes.HasReceivedStarter) && Conditions.IsFalse(ConditionTypes.HasDefeatedFirstPal))
+        if (!Conditions.IsTrue(ConditionTypes.HasDefeatedFirstPal) && (wildPal == null || wildPal.HP <= 0))
         {
             Conditions.ChangeCondition(ConditionTypes.HasDefeatedFirstPal, true);
             Conditions.ChangeCondition(ConditionTypes.PlayerNeedsFirstHealFromNoelia, true); // Set Noelia's trigger
             AudioManager.PlaySoundEffect("GoHeal.wav");
-            Typewriter.TypeLineWithDuration("\nGreat job on your first battle! Your Pal looks tired, go heal it at the Pal Center.", 7000);
+            Typewriter.TypeLineWithDuration("Great job on your first battle! Your Pal looks tired, go heal it at the Pal Center.", 7000);
         }
     }
 
@@ -434,9 +493,6 @@ public static class BattleManager
                     
                     if (!playerAllPalsEffectivelyFainted) // Check again if player still has Pals
                     {
-                        Typewriter.TypeLine($"Trainer {Game.ActiveTrainer.Name} is about to send out {nextTrainerPal.Name}!");
-                        System.Threading.Thread.Sleep(1500); // Short pause
-                        
                         StartBattle(currentFightingPlayerPal, nextTrainerPal, isTrainerBattle: true, isMidTrainerBattleSwitch: true);
                         return; // Battle continues with next trainer Pal, DO NOT proceed to cleanup
                     }
@@ -447,35 +503,20 @@ public static class BattleManager
                     // All trainer's Pals defeated - Player wins trainer battle!
                     if(Game.ActiveTrainer.Name == "Trainer Saul")
                     {
-                        Typewriter.TypeLine("Saul: There's no way you defeated me!!");
-                        System.Threading.Thread.Sleep(1500); // Pause for effect
+                        AudioManager.PlaySoundEffect("SaulDefeat.wav");
+                        Typewriter.TypeLineWithDuration("Saul: There's no way you defeated me!!", 3000);
                         _saulJustDefeated = true; // Set flag for end-of-game message
                         Conditions.ChangeCondition(ConditionTypes.DefeatedTrainerSaul, true);
                     }
-                    Typewriter.TypeLine($"You defeated Trainer {Game.ActiveTrainer.Name}!");
-                    // Use the specific condition for Saul, or a general one later
-                    // if(Game.ActiveTrainer.Name == "Trainer Saul") Conditions.ChangeCondition(ConditionTypes.DefeatedTrainerSaul, true); // Moved up for Saul
-                    
-                    int overallXpReward = 150; 
-                    Typewriter.TypeLine($"You gained an additional {overallXpReward} XP for the victory!");
-                    var consciousPlayerPals = Player.Pals.Where(p => p.HP > 0).ToList();
-                    if (consciousPlayerPals.Any())
-                    {
-                        int xpPerPal = overallXpReward / consciousPlayerPals.Count;
-                        foreach(var p in consciousPlayerPals) { p.AddExperience(xpPerPal); }
-                    }
-                    // TODO: Add other rewards like money, items.
-                    // Dialogue like "Saul: Hmph! Lucky shot..." is now in ConversationCommandHandler post-battle check.
                 }
             }
-            
             // This check needs to be robust. If trainerPalFainted led to victory, this shouldn't execute for loss.
             // So, ensure playerAllPalsEffectivelyFainted is checked if the trainer battle didn't just end in player victory.
             if (playerAllPalsEffectivelyFainted && Game.ActiveTrainerParty != null) // Check ActiveTrainerParty to ensure we are still in trainer context that hasn't been cleared by victory
             {
                 // Player lost the trainer battle
-                Typewriter.TypeLine($"All your Pals have fainted! You were defeated by Trainer {Game.ActiveTrainer.Name}!");
-                // Dialogue like "Saul: Hah! You're weak!" is now in ConversationCommandHandler post-battle check.
+                AudioManager.PlaySoundEffect("SaulWin.wav");
+                Typewriter.TypeLineWithDuration("Saul: Hah! You're weak! You can't beat me! Come back when you're ready.", 5000);
             }
             
             // If trainer battle is resolved (win or loss), clear trainer-specific state
@@ -503,7 +544,6 @@ public static class BattleManager
                 playerPal.AddExperience(xpGained);
             }
             Console.Clear();
-            Player.Look();
         }
         // Case 3: Wild Pal Tamed (and not a trainer battle)
         else if (!_isTrainerBattle && _lastBattleWonByTaming && wildPal != null) 
@@ -534,49 +574,60 @@ public static class BattleManager
             // No specific XP or reward here, just cleanup.
         }
 
-        // General Battle Cleanup - This happens if the battle is TRULY over and not continuing (e.g. next trainer Pal).
-        isBattleActive = false;
-        States.ChangeState(StateTypes.Exploring);
-        AudioManager.Stop(); 
+        // If we reach here, the battle is definitively over (not continuing with another trainer Pal).
+
+        // Stop battle audio and restore location audio
+        AudioManager.Stop(); // ADDED
         if (!string.IsNullOrEmpty(previousLocationAudio))
         {
             AudioManager.PlayLooping(previousLocationAudio);
         }
-        else if(Player.CurrentLocation?.AudioFile != null)
+        else if (Player.CurrentLocation?.AudioFile != null)
         {
             AudioManager.PlayLooping(Player.CurrentLocation.AudioFile);
         }
-        
-        // Clear active wild Pal from location if it was a non-trainer, non-tamed wild encounter that concluded.
-        if (!_isTrainerBattle && Player.CurrentLocation != null && !_lastBattleWonByTaming && (wildPal == null || wildPal.HP <=0) )
+
+        // Clear wild Pal from the location's data if the non-trainer battle encounter is over
+        if (!_isTrainerBattle && Player.CurrentLocation != null)
         {
+            // This covers cases where a non-trainer battle ends (wild Pal defeated, player ran, or Pal was tamed).
+            // The specific Pal instance from this encounter should no longer be considered active at this location.
             Player.CurrentLocation.ActiveWildPal = null;
         }
 
-        // Reset all battle-specific state variables
+        // Reset BattleManager's internal Pal references and core battle-specific flags
         playerPal = null; 
-        wildPal = null; 
-        _lastBattleWonByTaming = false;
-        _isTrainerBattle = false; // Reset for the next potential battle
+        wildPal = null; // The opponent Pal instance handled by BattleManager is done.
+        _lastBattleWonByTaming = false; // Reset for the next battle.
+        // _isTrainerBattle is typically reset by StartBattle. If not, ensure it's false here for safety
+        // if the battle ending wasn't a trainer one or if StartBattle doesn't cover all exit paths.
+        // For now, assuming StartBattle handles its initialization for the next encounter.
         playerDefending = false;
         enemyDefending = false;
-        // Ensure trainer state is cleared if somehow missed by specific trainer logic paths
+
+        // Ensure trainer state is cleared if somehow missed by specific trainer logic paths (this was correctly retained)
         if (Game.ActiveTrainer != null) Game.ActiveTrainer = null; 
         if (Game.ActiveTrainerParty != null) Game.ActiveTrainerParty = null;
 
-        Player.Look(); 
-        Console.Clear(); // Clear console before tutorial message for better visibility
-        CheckAndTriggerFirstWinTutorial(); // Moved to the very end
+        isBattleActive = false; // Mark battle as definitively over from BattleManager's perspective.
 
         if (_saulJustDefeated)
         {
             _saulJustDefeated = false; // Consume the flag
+            AudioManager.Stop();
             Console.Clear();
             Typewriter.TypeLine("==============================================");
             Typewriter.TypeLine("Congrats, you win!");
-            Typewriter.TypeLine("Thank you for playing AdventureS25!");
             Typewriter.TypeLine("==============================================");
-            // Potentially add a game over state or prompt to exit here in a fuller game.
+            Game.ContinueMainLoop = false; // MODIFIED
+            // Game might effectively end here or transition to a special post-game state.
+        }
+        else 
+        {
+            States.ChangeState(StateTypes.Exploring); // Set state to Exploring
+            Console.Clear();                          // Clear console
+            Player.Look();                            // Player looks at the location
+            CheckAndTriggerFirstWinTutorial();        // Display tutorial if applicable
         }
     }
 
@@ -623,7 +674,7 @@ public static class BattleManager
         }
         else
         {
-            playerPal = Player.PromptPalSelection(availablePals, "Choose another Pal to continue the fight:");
+            playerPal = Player.PromptPalSelection(availablePals, "\nChoose another Pal to continue the fight:");
         }
 
         if (playerPal != null)

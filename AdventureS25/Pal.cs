@@ -16,7 +16,7 @@ public class Pal
     public int HP { get; set; }
     public int MaxHP { get; set; }
 
-    public int Level { get; private set; }
+    public int Level { get; set; }
     public int ExperiencePoints { get; private set; }
     public int ExperienceToNextLevel { get; private set; }
 
@@ -95,6 +95,58 @@ public class Pal
         // The while loop in AddExperience will handle calling LevelUp again.
     }
 
+    public void InitializeStatsForLevel()
+    {
+        if (this.Level <= 0) this.Level = 1;
+
+        if (this.Level == 1)
+        {
+            this.ExperiencePoints = 0;
+            this.ExperienceToNextLevel = 100; // Base XP for Lvl 1 to reach Lvl 2
+            this.HP = this.MaxHP;
+            return;
+        }
+
+        // Reset to Level 1 base stats before calculation.
+        // The constructor sets MaxHP, BaseAttackDamage, BaseSpecialAttackDamage to Lvl 1 values.
+        // These are assumed to be the true Lvl 1 base stats.
+
+        int simulatedCurrentLevel = 1;
+        // ExperiencePoints for Lvl 1 is 0, ExperienceToNextLevel for Lvl 1 to reach Lvl 2 is 100.
+        // These are set by the constructor and don't need to be reset if Level > 1 initially.
+        // However, to be safe and clear, especially if this method could be called in other contexts:
+        this.ExperiencePoints = 0;
+        this.ExperienceToNextLevel = 100; // XP to reach Lvl 2
+
+        // Re-fetch Lvl 1 stats if they could have been modified from constructor defaults.
+        // This part is tricky without knowing the exact design of how base stats are stored vs modified.
+        // For now, we assume the current MaxHP, BaseAttackDamage, etc., ARE the Lvl 1 base values
+        // if this method is called right after deserialization and before any other modifications.
+        // If not, one would typically fetch base stats from a definition or reset them to known Lvl 1 constants.
+        // Let's proceed assuming current values are Lvl 1 base if Level was >1 from JSON.
+
+        while (simulatedCurrentLevel < this.Level)
+        {
+            simulatedCurrentLevel++;
+
+            // Stat increases (must match LevelUp() method's increments)
+            int hpIncrease = 10;
+            this.MaxHP += hpIncrease;
+
+            int attackIncrease = 2;
+            this.BaseAttackDamage += attackIncrease;
+
+            int specialAttackIncrease = 3;
+            this.BaseSpecialAttackDamage += specialAttackIncrease;
+
+            // Update ExperienceToNextLevel for the *new* simulatedCurrentLevel
+            this.ExperienceToNextLevel = simulatedCurrentLevel * 100;
+        }
+
+        this.ExperiencePoints = 0; // Ensure XP is 0 at the target level
+        this.HP = this.MaxHP;      // Heal to new max HP
+    }
+
     public string GetLocationDescription()
     {
         return $"{AsciiArt}\n{InitialDescription}";
@@ -106,5 +158,11 @@ public class Pal
         // that should be unique per instance (e.g., a list of status effects that can change),
         // a more detailed deep copy would be needed for those members.
         return (Pal)this.MemberwiseClone();
+    }
+
+    public void ResetAttackUses()
+    {
+        BasicAttackUses = MaxBasicAttackUses;
+        SpecialAttackUses = MaxSpecialAttackUses;
     }
 }

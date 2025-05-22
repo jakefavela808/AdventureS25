@@ -28,6 +28,7 @@ public static class Pals
                 continue;
             }
             nameToPal[pal.Name] = pal;
+            pal.InitializeStatsForLevel(); // Ensure Pal's stats are initialized based on its Level
 
             if (pal.Location == null)
             {

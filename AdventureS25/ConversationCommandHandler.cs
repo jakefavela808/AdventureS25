@@ -173,7 +173,7 @@ public static class ConversationCommandHandler
                     }
                     else
                     {
-                        chosenPal = Player.PromptPalSelection(Player.Pals, "Which Pal should receive the XP?");
+                        chosenPal = Player.PromptPalSelection(Player.Pals, "\nWhich Pal should receive the XP from Noelia?");
                     }
                     if (chosenPal != null)
                     {
@@ -227,13 +227,14 @@ public static class ConversationCommandHandler
         {
             if (Conditions.IsTrue(ConditionTypes.PlayerHasPotionForMatt))
             {
-                // Logic for when player has the potion for Matt
+                // Logic for when player has the potion task
                 if (Player.HasItem("potion"))
                 {
                     AudioManager.StopAllSoundEffects();
                     AudioManager.PlaySoundEffect("PotionDelivered.wav");
                     Typewriter.TypeLineWithDuration("Matt: Is that... a potion? From Noelia? Oh, thank goodness! I was starting to think I'd be stuck like this forever.", 7500);
                     Player.RemoveItemFromInventory("potion");
+                    Typewriter.TypeLine("A potion has been removed from your inventory.");
                     Conditions.ChangeCondition(ConditionTypes.PlayerHasPotionForMatt, false); // Quest to deliver potion completed
                     AudioManager.StopAllSoundEffects();
                     AudioManager.PlaySoundEffect("TakeThisKey.wav");
@@ -261,7 +262,7 @@ public static class ConversationCommandHandler
                             }
                             else if (availablePals.Count > 1)
                             {
-                                chosenPalForMattXp = Player.PromptPalSelection(availablePals, "Which Pal should receive the XP from Matt?");
+                                chosenPalForMattXp = Player.PromptPalSelection(availablePals, "\nWhich Pal should receive the XP from Matt?");
                             }
                             else // No available Pals (all fainted, though Player.Pals.Any() was true)
                             {
@@ -288,13 +289,14 @@ public static class ConversationCommandHandler
                 }
                 else
                 {
-                    Typewriter.TypeLine("Matt: Noelia said you might have something for me, but it looks like you don't have that potion on you right now. Did you lose it?");
+                    AudioManager.PlaySoundEffect("LostPotion.wav");
+                    Typewriter.TypeLineWithDuration("Matt: Noelia said you might have something for me, but it looks like you don't have that potion on you right now. Did you lose it?", 6000);
                 }
             }
             else
             {
                 // Default dialogue if player doesn't have the potion task or has already completed it.
-                Typewriter.TypeLine("Matt: Urgh... just trying to rest here. This old cabin isn't doing my cough any favors.");
+                Typewriter.TypeLine("Matt is busy right now and doesn't have anything else for you.");
             }
             // After Matt's interaction, show commands then return to exploring
             Console.WriteLine(CommandList.conversationCommands);
@@ -307,52 +309,75 @@ public static class ConversationCommandHandler
         {
             if (Conditions.IsTrue(ConditionTypes.DefeatedTrainerSaul))
             {
-                Typewriter.TypeLine("Trainer Saul: Grr... I'm training for our rematch! You got lucky last time!");
-                States.ChangeState(StateTypes.Exploring);
-                // Player.Look(); // Look is called later if no other interaction happens
-                return;
-            }
+                AudioManager.StopAllSoundEffects(); 
+                AudioManager.PlaySoundEffect("SaulDefeated.wav");
+                Typewriter.TypeLineWithDuration("Saul: Ugh... fine, you win. I guess you're not as weak as I thought. Now get outta here, I need to rethink my entire strategy.", 7000);
 
-            Typewriter.TypeLine("Trainer Saul: You think you're tough enough to face me, rookie?");
-            Typewriter.TypeLine("Trainer Saul challenges you to a battle!");
-            AudioManager.PlaySoundEffect("TrainerBattleStart.wav"); 
+                AudioManager.Stop(); // Stop all music
 
-            Game.ActiveTrainer = npc; 
-            Game.ActiveTrainerParty = new List<Pal>
-            {
-                Pals.GetPalByName("Lostling")!,
-                Pals.GetPalByName("Smiley")!,
-            };
+                Typewriter.TypeLine("\n================================================");
+                Typewriter.TypeLine("Congratulations! You have defeated Trainer Saul!");
+                Typewriter.TypeLine("You have proven yourself as a true Pal Master.");
+                Typewriter.TypeLine("Thank you for playing AdventureS25!");
+                Typewriter.TypeLine("================================================");
+                Typewriter.TypeLine("\nThe adventure ends here... for now.");
+                Typewriter.TypeLine("You can now close the game window.");
 
-            foreach (var pal in Game.ActiveTrainerParty)
-            {
-                if (pal == null) continue; 
-                pal.GetType().GetProperty("Level")!.SetValue(pal, 5, null);
-                pal.MaxHP += 10 * 4; 
-                pal.HP = pal.MaxHP;
-                pal.BasicAttackUses = pal.MaxBasicAttackUses;
-                pal.SpecialAttackUses = pal.MaxSpecialAttackUses;
-            }
-            Game.CurrentTrainerPalIndex = 0;
-
-            Pal? firstSaulPal = Game.ActiveTrainerParty[Game.CurrentTrainerPalIndex];
-
-            if (firstSaulPal != null && firstSaulPal.HP > 0) // Ensure Pal is conscious
-            {
-                // BattleManager.StartBattle will handle Player Pal selection and set state to Fighting.
-                BattleManager.StartBattle(null, firstSaulPal, isTrainerBattle: true); 
-                // After StartBattle, control should return to the main game loop to process battle commands.
-                // The ConversationCommandHandler's job for initiating this specific Pal battle is done.
+                // Do not change state, just return. The main game loop should handle termination.
                 return; 
             }
             else
             {
-                Typewriter.TypeLine("Trainer Saul: Huh? My Pals aren't ready! Lucky for you..."); // Should not happen with this setup
-                Game.ActiveTrainer = null; // Clear active trainer state
-                Game.ActiveTrainerParty = null;
-                States.ChangeState(StateTypes.Exploring);
-                // Player.Look(); // Look is called later
-                return;
+                // Initial battle encounter with Saul
+                AudioManager.PlaySoundEffect("Goodluck.wav");
+                Typewriter.TypeLineWithDuration("Trainer Saul: You think you're tough enough to face me? HAHAHA, Good luck!", 5000);
+                Typewriter.TypeLine("Trainer Saul challenges you to a battle!");
+
+                // Setup Trainer Saul for battle
+                Game.ActiveTrainer = npc;
+                // Get prototype Pals for Saul's party
+                var saulProtoPals = new List<Pal?>
+                {
+                    Pals.GetPalByName("Lostling"), 
+                    Pals.GetPalByName("Smiley") 
+                };
+
+                // Clone the prototypes for Saul's actual battle party
+                Game.ActiveTrainerParty = new List<Pal>();
+                foreach (var protoPal in saulProtoPals)
+                {
+                    if (protoPal != null)
+                    {
+                        Pal battlePal = protoPal.Clone(); 
+                        Game.ActiveTrainerParty.Add(battlePal);
+                    }
+                }
+                
+                // Ensure the party is not empty if cloning/leveling failed for some reason
+                if (Game.ActiveTrainerParty == null || !Game.ActiveTrainerParty.Any())
+                {
+                    Typewriter.TypeLine("[ERROR] Failed to set up Trainer Saul's party properly.");
+                    Game.ActiveTrainer = null;
+                    States.ChangeState(StateTypes.Exploring);
+                    Player.Look();
+                    return;
+                }
+
+                var availablePlayerPals = Player.GetAvailablePals();
+                if (availablePlayerPals.Count == 0)
+                {
+                    AudioManager.PlaySoundEffect("SaulNoPals.wav");
+                    Typewriter.TypeLineWithDuration("Trainer Saul: You have no Pals ready to battle! Come back when you're prepared.", 5000);
+                    Game.ActiveTrainer = null; // Clear active trainer state as battle won't start
+                    Game.ActiveTrainerParty = null;
+                    States.ChangeState(StateTypes.Exploring);
+                    Console.Clear();
+                    Player.Look();
+                    return;
+                }
+
+                // Start battle - pass null for player's Pal to let BattleManager handle selection.
+                BattleManager.StartBattle(null, Game.ActiveTrainerParty.First(), isTrainerBattle: true);
             }
         }
         // Default NPC
